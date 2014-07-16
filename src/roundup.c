@@ -53,20 +53,92 @@
 #define TRUE !FALSE
 #endif
 
+#define PUFFLE_TILE_HEIGHT 34
+#define PUFFLE_TILE_WIDTH 32
+
 /* Enumerar las imágenes */
 enum {
-	/* TODO: Listar las imágenes */
-	IMG_DUMMY,
+	IMG_FONDO,
+	IMG_PUFFLE_PEN,
+	
+	IMG_PUFFLE_BLUE,
+	
+	IMG_PEN,
+	IMG_WALL,
 	
 	NUM_IMAGES
 };
 
 const char *images_names[NUM_IMAGES] = {
-	/* TODO: Listar las rutas */
-	GAMEDATA_DIR "images/dummy.png",
+	GAMEDATA_DIR "images/fondo.png",
+	GAMEDATA_DIR "images/puffle-pen.png",
+	
+	GAMEDATA_DIR "images/puffle-azul.png",
+	
+	GAMEDATA_DIR "images/pen.png",
+	GAMEDATA_DIR "images/wall.png"
 };
 
-/* TODO: Listar aquí los automátas */
+/* Enumerar las caras de los Puffles */
+enum {
+	FACE_0_0, FACE_0_1, FACE_0_2, FACE_0_3,
+	FACE_1_0, FACE_1_1, FACE_1_2, FACE_1_3,
+	FACE_2_0, FACE_2_1, FACE_2_2, FACE_2_3,
+	FACE_3_0,
+	FACE_4_0,
+	FACE_5_0,
+	FACE_DUMMY, /* Intencionalmente se deja en blanco para alinear cada 4 las caras */
+	FACE_6_0, FACE_6_1, FACE_6_2, FACE_6_3,
+	FACE_7_0, FACE_7_1, FACE_7_2, FACE_7_3,
+	FACE_J0_0, FACE_J0_1, FACE_J0_2, FACE_J0_3, FACE_J0_4, FACE_J0_5, FACE_J0_6, FACE_J0_7, FACE_J0_8, FACE_J0_9, FACE_J0_10, FACE_J0_11,
+	FACE_J1_0, FACE_J1_1, FACE_J1_2, FACE_J1_3, FACE_J1_4, FACE_J1_5, FACE_J1_6, FACE_J1_7, FACE_J1_8, FACE_J1_9, FACE_J1_10, FACE_J1_11,
+	FACE_J2_0, FACE_J2_1, FACE_J2_2, FACE_J2_3, FACE_J2_4, FACE_J2_5, FACE_J2_6, FACE_J2_7, FACE_J2_8, FACE_J2_9, FACE_J2_10, FACE_J2_11,
+	FACE_J3_0, FACE_J3_1, FACE_J3_2, FACE_J3_3, FACE_J3_4, FACE_J3_5, FACE_J3_6, FACE_J3_7, FACE_J3_8, FACE_J3_9, FACE_J3_10, FACE_J3_11,
+	FACE_J4_0, FACE_J4_1, FACE_J4_2, FACE_J4_3, FACE_J4_4, FACE_J4_5, FACE_J4_6, FACE_J4_7, FACE_J4_8, FACE_J4_9, FACE_J4_10, FACE_J4_11,
+	FACE_J5_0, FACE_J5_1, FACE_J5_2, FACE_J5_3, FACE_J5_4, FACE_J5_5, FACE_J5_6, FACE_J5_7, FACE_J5_8, FACE_J5_9, FACE_J5_10, FACE_J5_11,
+	FACE_J6_0, FACE_J6_1, FACE_J6_2, FACE_J6_3, FACE_J6_4, FACE_J6_5, FACE_J6_6, FACE_J6_7, FACE_J6_8, FACE_J6_9, FACE_J6_10, FACE_J6_11,
+	FACE_J7_0, FACE_J7_1, FACE_J7_2, FACE_J7_3, FACE_J7_4, FACE_J7_5, FACE_J7_6, FACE_J7_7, FACE_J7_8, FACE_J7_9, FACE_J7_10, FACE_J7_11
+};
+
+enum {
+	PUFFLE_DIR_0,
+	PUFFLE_DIR_1,
+	PUFFLE_DIR_2,
+	PUFFLE_DIR_3,
+	PUFFLE_DIR_4,
+	PUFFLE_DIR_5,
+	PUFFLE_DIR_6,
+	PUFFLE_DIR_7,
+	PUFFLE_WALK_0,
+	PUFFLE_WALK_1,
+	PUFFLE_WALK_2,
+	PUFFLE_WALK_3,
+	PUFFLE_WALK_4,
+	PUFFLE_WALK_5,
+	PUFFLE_WALK_6,
+	PUFFLE_WALK_7,
+	
+	NUM_PUFFLE_MODS
+};
+
+/* Pseudo animación para el puffle */
+int puffle_frame_normal [55] = {
+	/* Cuando el puffle mira al Frente */
+	FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0,
+	FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0,
+	FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0,
+	FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0,
+	FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0,
+	FACE_0_1, FACE_0_1,
+	FACE_0_2, FACE_0_2, FACE_0_2, FACE_0_2,
+	FACE_0_3, FACE_0_3,
+	-1 /* Fin de la animación */
+};
+
+int puffle_frame_jump [13] = {
+	FACE_J0_0, FACE_J0_1, FACE_J0_2, FACE_J0_3, FACE_J0_4, FACE_J0_5, FACE_J0_6, FACE_J0_7, FACE_J0_8, FACE_J0_9, FACE_J0_10, FACE_J0_11,
+	-1
+};
 
 /* Codigos de salida */
 enum {
@@ -81,6 +153,7 @@ enum {
 int game_loop (void);
 void setup (void);
 SDL_Surface * set_video_mode(unsigned);
+void copy_puffle_tile (int puffle_tiles, SDL_Rect *rect, int tile);
 
 /* Variables globales */
 SDL_Surface * screen;
@@ -107,6 +180,10 @@ int game_loop (void) {
 	
 	SDL_EventState (SDL_MOUSEMOTION, SDL_IGNORE);
 	
+	int anim = 0;
+	int dir = 0;
+	int imagen;
+	
 	do {
 		last_time = SDL_GetTicks ();
 		
@@ -116,9 +193,67 @@ int game_loop (void) {
 					/* Vamos a cerrar la aplicación */
 					done = GAME_QUIT;
 					break;
+				case SDL_KEYDOWN:
+					key = event.key.keysym.sym;
+					
+					if (key == SDLK_KP4) {
+						dir = 2;
+					} else if (key == SDLK_KP7) {
+						dir = 3;
+					} else if (key == SDLK_KP8) {
+						dir = 4;
+					} else if (key == SDLK_KP9) {
+						dir = 5;
+					} else if (key == SDLK_KP6) {
+						dir = 6;
+					} else if (key == SDLK_KP3) {
+						dir = 7;
+					} else if (key == SDLK_KP2) {
+						dir = 0;
+					} else if (key == SDLK_KP1) {
+						dir = 1;
+					}
+					
+					if (key == SDLK_SPACE) {
+						if (dir < 8) {
+							dir = dir + 8;
+							anim = 0;
+						}
+					}
+					break;
 			}
 		}
 		
+		if (dir == PUFFLE_DIR_3 || dir == PUFFLE_DIR_4 || dir == PUFFLE_DIR_5) {
+			anim = 0;
+			imagen = FACE_3_0 + (dir - PUFFLE_DIR_3);
+		} else {
+			if (dir / 8 == 1) {
+				imagen = (dir - PUFFLE_WALK_0) * 12 + puffle_frame_jump[anim];
+				
+				anim++;
+				/* Secuencia de brinco, si llegamos al final pasar a la otra animación */
+				if (puffle_frame_jump[anim] == -1) {
+					anim = 0;
+					dir = dir - 8;
+				}
+			} else {
+				imagen = (dir * 4) + puffle_frame_normal[anim];
+				if (dir > PUFFLE_DIR_5) imagen -= 8;
+				
+				anim++;
+				if (puffle_frame_normal[anim] == -1) {
+					anim = 0;
+				}
+			}
+		}
+		
+		rect.x = 100;
+		rect.y = 100;
+		
+		SDL_BlitSurface (images[IMG_FONDO], NULL, screen, NULL);
+		
+		copy_puffle_tile (IMG_PUFFLE_BLUE, &rect, imagen);
 		
 		SDL_Flip (screen);
 		
@@ -185,3 +320,13 @@ void setup (void) {
 	srand (SDL_GetTicks ());
 }
 
+void copy_puffle_tile (int puffle_tiles, SDL_Rect *rect, int tile) {
+	SDL_Rect r_tile;
+	
+	rect->w = r_tile.w = PUFFLE_TILE_WIDTH;
+	rect->h = r_tile.h = PUFFLE_TILE_HEIGHT;
+	r_tile.x = (tile % 8) * PUFFLE_TILE_WIDTH;
+	r_tile.y = (tile / 8) * PUFFLE_TILE_HEIGHT;
+	
+	SDL_BlitSurface (images[puffle_tiles], &r_tile, screen, rect);
+}

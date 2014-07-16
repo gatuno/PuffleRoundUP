@@ -1,4 +1,8 @@
 gamedatadir = $(pkgdatadir)/data
 
-nobase_dist_gamedata_DATA = # Listar aquí las imágenes
+nobase_dist_gamedata_DATA = images/fondo.png \
+	images/pen.png \
+	images/puffle-azul.png \
+	images/puffle-pen.png \
+	images/wall.png
 
