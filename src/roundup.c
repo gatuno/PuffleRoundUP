@@ -63,6 +63,7 @@ enum {
 	IMG_PUFFLE_PEN,
 	
 	IMG_PUFFLE_BLUE,
+	IMG_PUFFLE_PINK,
 	
 	IMG_PEN,
 	IMG_WALL,
@@ -75,6 +76,7 @@ const char *images_names[NUM_IMAGES] = {
 	GAMEDATA_DIR "images/puffle-pen.png",
 	
 	GAMEDATA_DIR "images/puffle-azul.png",
+	GAMEDATA_DIR "images/puffle-rosa.png",
 	
 	GAMEDATA_DIR "images/pen.png",
 	GAMEDATA_DIR "images/wall.png"
@@ -287,7 +289,7 @@ int game_loop (void) {
 		
 		SDL_BlitSurface (images[IMG_FONDO], NULL, screen, NULL);
 		
-		copy_puffle_tile (IMG_PUFFLE_BLUE, &rect, imagen);
+		copy_puffle_tile (IMG_PUFFLE_PINK, &rect, imagen);
 		
 		SDL_Flip (screen);
 		
