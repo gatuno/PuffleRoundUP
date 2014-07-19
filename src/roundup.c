@@ -32,6 +32,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 #include <SDL.h>
 #include <SDL_image.h>
@@ -122,7 +123,7 @@ enum {
 };
 
 /* Pseudo animación para el puffle */
-int puffle_frame_normal [55] = {
+const int puffle_frame_normal [55] = {
 	/* Cuando el puffle mira al Frente */
 	FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0,
 	FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0,
@@ -135,7 +136,7 @@ int puffle_frame_normal [55] = {
 	-1 /* Fin de la animación */
 };
 
-int puffle_frame_jump [13] = {
+const int puffle_frame_jump [13] = {
 	FACE_J0_0, FACE_J0_1, FACE_J0_2, FACE_J0_3, FACE_J0_4, FACE_J0_5, FACE_J0_6, FACE_J0_7, FACE_J0_8, FACE_J0_9, FACE_J0_10, FACE_J0_11,
 	-1
 };
@@ -147,13 +148,30 @@ enum {
 	GAME_QUIT
 };
 
+/* La meta información de los puffles */
+const int puffle_data[10][2] = { /* {distancia, velocidad} */
+	{45, 7} /* Puffle Azul */
+};
+
 /* Estructuras */
+typedef struct {
+	int capturado;
+	int escapado;
+	int distancia;
+	int velocidad;
+	int color;
+	int frame;
+	int dir;
+	int x, y;
+} Puffle;
 
 /* Prototipos de función */
 int game_loop (void);
 void setup (void);
 SDL_Surface * set_video_mode(unsigned);
 void copy_puffle_tile (int puffle_tiles, SDL_Rect *rect, int tile);
+double encontrar_distancia (int dx, int dy);
+int encontrar_angulo_y_dir (int x1, int y1, int x2, int y2);
 
 /* Variables globales */
 SDL_Surface * screen;
@@ -177,12 +195,24 @@ int game_loop (void) {
 	SDLKey key;
 	Uint32 last_time, now_time;
 	SDL_Rect rect;
+	int imagen;
+	double distancia;
+	int mousex, mousey, dx, dy;
+	double incrementox, incrementoy;
+	int nextx, nexty;
+	
+	Puffle azul;
+	
+	azul.color = 0;
+	azul.capturado = azul.escapado = FALSE;
+	azul.frame = 0;
+	azul.dir = PUFFLE_DIR_0;
+	azul.distancia = puffle_data[azul.color][0];
+	azul.velocidad = puffle_data[azul.color][1];
+	azul.x = 539;
+	azul.y = 76;
 	
 	SDL_EventState (SDL_MOUSEMOTION, SDL_IGNORE);
-	
-	int anim = 0;
-	int dir = 0;
-	int imagen;
 	
 	do {
 		last_time = SDL_GetTicks ();
@@ -194,62 +224,66 @@ int game_loop (void) {
 					done = GAME_QUIT;
 					break;
 				case SDL_KEYDOWN:
-					key = event.key.keysym.sym;
-					
-					if (key == SDLK_KP4) {
-						dir = 2;
-					} else if (key == SDLK_KP7) {
-						dir = 3;
-					} else if (key == SDLK_KP8) {
-						dir = 4;
-					} else if (key == SDLK_KP9) {
-						dir = 5;
-					} else if (key == SDLK_KP6) {
-						dir = 6;
-					} else if (key == SDLK_KP3) {
-						dir = 7;
-					} else if (key == SDLK_KP2) {
-						dir = 0;
-					} else if (key == SDLK_KP1) {
-						dir = 1;
-					}
-					
-					if (key == SDLK_SPACE) {
-						if (dir < 8) {
-							dir = dir + 8;
-							anim = 0;
-						}
-					}
 					break;
 			}
 		}
 		
-		if (dir == PUFFLE_DIR_3 || dir == PUFFLE_DIR_4 || dir == PUFFLE_DIR_5) {
-			anim = 0;
-			imagen = FACE_3_0 + (dir - PUFFLE_DIR_3);
-		} else {
-			if (dir / 8 == 1) {
-				imagen = (dir - PUFFLE_WALK_0) * 12 + puffle_frame_jump[anim];
+		SDL_GetMouseState (&mousex, &mousey);
+		
+		if (!azul.escapado) {
+			dx = mousex - azul.x;
+			dy = mousey - azul.y;
+			
+			distancia = encontrar_distancia (dx, dy);
+			
+			if (distancia < azul.distancia) {
+				incrementox = ((double) dx) / (distancia / ((double) azul.velocidad));
+				incrementoy = ((double) dy) / (distancia / ((double) azul.velocidad));
 				
-				anim++;
+				nextx = azul.x - incrementox;
+				nexty = azul.y - incrementoy;
+				
+				azul.dir = encontrar_angulo_y_dir (mousex, mousey, azul.x, azul.y) + 8;
+				azul.frame = 0;
+				
+				/* Colisión contra el muro */
+				
+				/* Colisión contra el interior de la jaula, si no, capturado = FALSE */
+				
+				
+				azul.x = nextx;
+				azul.y = nexty;
+				
+				/* Colisión de salida */
+			}
+		}
+		
+		if (azul.dir == PUFFLE_DIR_3 || azul.dir == PUFFLE_DIR_4 || azul.dir == PUFFLE_DIR_5) {
+			//anim = 0;
+			imagen = FACE_3_0 + (azul.dir - PUFFLE_DIR_3);
+		} else {
+			if (azul.dir / 8 == 1) {
+				imagen = (azul.dir - PUFFLE_WALK_0) * 12 + puffle_frame_jump[azul.frame];
+				
+				azul.frame++;
 				/* Secuencia de brinco, si llegamos al final pasar a la otra animación */
-				if (puffle_frame_jump[anim] == -1) {
-					anim = 0;
-					dir = dir - 8;
+				if (puffle_frame_jump[azul.frame] == -1) {
+					azul.frame = 0;
+					azul.dir = azul.dir - 8;
 				}
 			} else {
-				imagen = (dir * 4) + puffle_frame_normal[anim];
-				if (dir > PUFFLE_DIR_5) imagen -= 8;
+				imagen = (azul.dir * 4) + puffle_frame_normal[azul.frame];
+				if (azul.dir > PUFFLE_DIR_5) imagen -= 8;
 				
-				anim++;
-				if (puffle_frame_normal[anim] == -1) {
-					anim = 0;
+				azul.frame++;
+				if (puffle_frame_normal[azul.frame] == -1) {
+					azul.frame = 0;
 				}
 			}
 		}
 		
-		rect.x = 100;
-		rect.y = 100;
+		rect.x = azul.x - 14;
+		rect.y = azul.y - 22;
 		
 		SDL_BlitSurface (images[IMG_FONDO], NULL, screen, NULL);
 		
@@ -330,3 +364,27 @@ void copy_puffle_tile (int puffle_tiles, SDL_Rect *rect, int tile) {
 	
 	SDL_BlitSurface (images[puffle_tiles], &r_tile, screen, rect);
 }
+
+int encontrar_angulo_y_dir (int x1, int y1, int x2, int y2) {
+	double dx = x2 - x1;
+	double dy = y2 - y1;
+	
+	int angulo = ((int) (atan2 (dy, dx) * 57.295780)) - 68; /* 90 - 22 */
+	
+	if (angulo < 0) {
+		angulo += 360;
+	}
+	
+	int dir = angulo / 45;
+	
+	if (dir > 7) {
+		dir = 0;
+	}
+	
+	return dir;
+}
+
+inline double encontrar_distancia (int dx, int dy) {
+	return sqrt (dx * dx + dy * dy);
+}
+
