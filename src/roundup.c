@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <string.h>
 
 #include <SDL.h>
 #include <SDL_image.h>
@@ -152,7 +153,36 @@ enum {
 
 /* La meta información de los puffles */
 const int puffle_data[10][2] = { /* {distancia, velocidad} */
-	{45, 7} /* Puffle Azul */
+	{45, 7},   /* Puffle puffles[g] */
+	{55, 11},  /* Puffle Rosa */
+	{90, 12},  /* Puffle Verde */
+	{100, 9},  /* Puffle Negro */
+	{100, 10}, /* Puffle Morado */
+	{120, 10}, /* Puffle Rojo */
+	{70, 7},   /* Puffle Amarillo */
+	{40, 5},   /* Puffle Blanco */
+	{110, 12}, /* Puffle Naranja */
+	{110, 12}  /* Puffle Café */
+};
+
+/* Las posiciones del mapa */
+const int map[8][10][2] = {
+	{{383, 206}, {580, 332}, {180, 332}, {271,  76}, {200, 152}, {260, 352}, {540, 272}, {420, 132}, {460, 192}, {300, 192}},
+	{{170, 119}, {142, 162}, {240, 127}, {246,  86}, {200, 152}, {558, 259}, {568, 192}, {281, 159}, {249, 235}, {207, 194}},
+	{{197, 261}, {550, 389}, {227, 387}, {402, 188}, {156, 160}, {379, 395}, {578, 285}, {574, 197}, {532, 247}, {213, 241}},
+	{{383, 123}, {580, 242}, {180, 252}, {319, 133}, {200, 242}, {260, 252}, {540, 252}, {420, 133}, {460, 123}, {300, 123}},
+	{{409, 243}, {617, 406}, {364, 261}, {214, 118}, {321, 195}, {235, 258}, {562, 153}, {392, 150}, {460, 192}, {134, 192}},
+	{{185, 166}, {160, 358}, {141, 184}, {545, 215}, {652, 291}, {567, 355}, {329, 161}, {262, 245}, {236, 115}, {466, 289}},
+	{{258, 132}, {137, 122}, {303, 113}, {160, 285}, {534, 211}, {620, 148}, {191, 374}, {376, 103}, {395, 214}, {239, 211}},
+	{{583, 260}, {611, 217}, {248, 171}, {507, 293}, {552, 227}, {194, 120}, {184, 187}, {547, 101}, {503, 144}, {545, 187}}
+};
+
+const int colores[5][10] = {
+	{0, 1, 2, 9, 3, 8, 4, 5, 9, 7},
+	{0, 1, 8, 8, 2, 3, 3, 4, 4, 4},
+	{0, 0, 1, 2, 3, 4, 9, 5, 5, 5},
+	{0, 1, 1, 2, 9, 9, 3, 8, 4, 5},
+	{0, 0, 9, 1, 8, 2, 3, 3, 4, 6}
 };
 
 /* Estructuras */
@@ -174,6 +204,7 @@ SDL_Surface * set_video_mode(unsigned);
 void copy_puffle_tile (int puffle_tiles, SDL_Rect *rect, int tile);
 double encontrar_distancia (int dx, int dy);
 int encontrar_angulo_y_dir (int x1, int y1, int x2, int y2);
+void acomodar_puffles (Puffle *puffles);
 
 /* Variables globales */
 SDL_Surface * screen;
@@ -201,18 +232,11 @@ int game_loop (void) {
 	double distancia;
 	int mousex, mousey, dx, dy;
 	double incrementox, incrementoy;
-	int nextx, nexty;
+	int nextx, nexty, g;
 	
-	Puffle azul;
+	Puffle puffles[10];
 	
-	azul.color = 0;
-	azul.capturado = azul.escapado = FALSE;
-	azul.frame = 0;
-	azul.dir = PUFFLE_DIR_0;
-	azul.distancia = puffle_data[azul.color][0];
-	azul.velocidad = puffle_data[azul.color][1];
-	azul.x = 539;
-	azul.y = 76;
+	acomodar_puffles (puffles);
 	
 	SDL_EventState (SDL_MOUSEMOTION, SDL_IGNORE);
 	
@@ -232,64 +256,72 @@ int game_loop (void) {
 		
 		SDL_GetMouseState (&mousex, &mousey);
 		
-		if (!azul.escapado) {
-			dx = mousex - azul.x;
-			dy = mousey - azul.y;
-			
-			distancia = encontrar_distancia (dx, dy);
-			
-			if (distancia < azul.distancia) {
-				incrementox = ((double) dx) / (distancia / ((double) azul.velocidad));
-				incrementoy = ((double) dy) / (distancia / ((double) azul.velocidad));
-				
-				nextx = azul.x - incrementox;
-				nexty = azul.y - incrementoy;
-				
-				azul.dir = encontrar_angulo_y_dir (mousex, mousey, azul.x, azul.y) + 8;
-				azul.frame = 0;
-				
-				/* Colisión contra el muro */
-				
-				/* Colisión contra el interior de la jaula, si no, capturado = FALSE */
-				
-				
-				azul.x = nextx;
-				azul.y = nexty;
-				
-				/* Colisión de salida */
-			}
-		}
-		
-		if (azul.dir == PUFFLE_DIR_3 || azul.dir == PUFFLE_DIR_4 || azul.dir == PUFFLE_DIR_5) {
-			//anim = 0;
-			imagen = FACE_3_0 + (azul.dir - PUFFLE_DIR_3);
-		} else {
-			if (azul.dir / 8 == 1) {
-				imagen = (azul.dir - PUFFLE_WALK_0) * 12 + puffle_frame_jump[azul.frame];
-				
-				azul.frame++;
-				/* Secuencia de brinco, si llegamos al final pasar a la otra animación */
-				if (puffle_frame_jump[azul.frame] == -1) {
-					azul.frame = 0;
-					azul.dir = azul.dir - 8;
-				}
-			} else {
-				imagen = (azul.dir * 4) + puffle_frame_normal[azul.frame];
-				if (azul.dir > PUFFLE_DIR_5) imagen -= 8;
-				
-				azul.frame++;
-				if (puffle_frame_normal[azul.frame] == -1) {
-					azul.frame = 0;
-				}
-			}
-		}
-		
-		rect.x = azul.x - 14;
-		rect.y = azul.y - 22;
-		
 		SDL_BlitSurface (images[IMG_FONDO], NULL, screen, NULL);
 		
-		copy_puffle_tile (IMG_PUFFLE_PINK, &rect, imagen);
+		for (g = 0; g < 10; g++) {
+			if (!puffles[g].escapado) {
+				dx = mousex - puffles[g].x;
+				dy = mousey - puffles[g].y;
+			
+				distancia = encontrar_distancia (dx, dy);
+			
+				if (distancia < puffles[g].distancia) {
+					incrementox = ((double) dx) / (distancia / ((double) puffles[g].velocidad));
+					incrementoy = ((double) dy) / (distancia / ((double) puffles[g].velocidad));
+				
+					nextx = puffles[g].x - incrementox;
+					nexty = puffles[g].y - incrementoy;
+				
+					puffles[g].dir = encontrar_angulo_y_dir (mousex, mousey, puffles[g].x, puffles[g].y) + 8;
+					puffles[g].frame = 0;
+				
+					/* Colisión contra el muro */
+				
+					/* Colisión contra el interior de la jaula, si no, capturado = FALSE */
+				
+				
+					puffles[g].x = nextx;
+					puffles[g].y = nexty;
+				
+					/* Colisión de salida */
+					if (nextx < 80 || nextx > 680 || nexty < 43 || nexty > 443) {
+						puffles[g].escapado = TRUE;
+						continue;
+					}
+				}
+				
+				/* Calcular la imagen para dibujar */
+				if (puffles[g].dir == PUFFLE_DIR_3 || puffles[g].dir == PUFFLE_DIR_4 || puffles[g].dir == PUFFLE_DIR_5) {
+					//anim = 0;
+					imagen = FACE_3_0 + (puffles[g].dir - PUFFLE_DIR_3);
+				} else {
+					if (puffles[g].dir / 8 == 1) {
+						imagen = (puffles[g].dir - PUFFLE_WALK_0) * 12 + puffle_frame_jump[puffles[g].frame];
+				
+						puffles[g].frame++;
+						/* Secuencia de brinco, si llegamos al final pasar a la otra animación */
+						if (puffle_frame_jump[puffles[g].frame] == -1) {
+							puffles[g].frame = 0;
+							puffles[g].dir = puffles[g].dir - 8;
+						}
+					} else {
+						imagen = (puffles[g].dir * 4) + puffle_frame_normal[puffles[g].frame];
+						if (puffles[g].dir > PUFFLE_DIR_5) imagen -= 8;
+				
+						puffles[g].frame++;
+						if (puffle_frame_normal[puffles[g].frame] == -1) {
+							puffles[g].frame = 0;
+						}
+					}
+				}
+				
+				/* Redibujar el puffle */
+				rect.x = puffles[g].x - 14;
+				rect.y = puffles[g].y - 22;
+				
+				copy_puffle_tile (puffles[g].color, &rect, imagen);
+			} /* Si no está escapado */
+		} /* Foreach puffles */
 		
 		SDL_Flip (screen);
 		
@@ -390,3 +422,28 @@ inline double encontrar_distancia (int dx, int dy) {
 	return sqrt (dx * dx + dy * dy);
 }
 
+void acomodar_puffles (Puffle *puffles) {
+	int g, r;
+	int paquete[10] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1};
+	int sel_mapa;
+	const int (*local_mapa)[2];
+	
+	r = RANDOM (5);
+	sel_mapa = RANDOM (8);
+	local_mapa = map[sel_mapa];
+	
+	/* TODO: Seleccionar un paquete de colores */
+	
+	for (g = 0; g < 10; g++) {
+		r = RANDOM (10);
+		
+		puffles[g].color = IMG_PUFFLE_BLUE + paquete [r];
+		puffles[g].capturado = puffles[g].escapado = FALSE;
+		puffles[g].frame = 0;
+		puffles[g].dir = PUFFLE_DIR_0;
+		puffles[g].distancia = puffle_data[paquete[r]][0];
+		puffles[g].velocidad = puffle_data[paquete[r]][1];
+		puffles[g].x = local_mapa[g][0];
+		puffles[g].y = local_mapa[g][1];
+	}
+}
