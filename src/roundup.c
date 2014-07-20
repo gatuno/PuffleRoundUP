@@ -272,8 +272,8 @@ int game_loop (void) {
 					nextx = puffles[g].x - incrementox;
 					nexty = puffles[g].y - incrementoy;
 				
+					if (puffles[g].dir / 8 == 0) puffles[g].frame = 0;
 					puffles[g].dir = encontrar_angulo_y_dir (mousex, mousey, puffles[g].x, puffles[g].y) + 8;
-					puffles[g].frame = 0;
 				
 					/* Colisión contra el muro */
 				
@@ -288,6 +288,8 @@ int game_loop (void) {
 						puffles[g].escapado = TRUE;
 						continue;
 					}
+				} else {
+					if (puffles[g].dir - 8 >= 0) puffles[g].dir -= 8;
 				}
 				
 				/* Calcular la imagen para dibujar */
@@ -433,11 +435,18 @@ void acomodar_puffles (Puffle *puffles) {
 	local_mapa = map[sel_mapa];
 	
 	/* TODO: Seleccionar un paquete de colores */
+	//memcpy (paquete, colores[r], sizeof (paquete));
+	
+	for (g = 0; g < 20; g++) {
+		r = RANDOM (9) + 1;
+		//printf ("Intercambiando %i por %i\n", 0, r);
+		sel_mapa = paquete[0];
+		paquete[0] = paquete[r];
+		paquete[r] = sel_mapa;
+	}
 	
 	for (g = 0; g < 10; g++) {
-		r = RANDOM (10);
-		
-		puffles[g].color = IMG_PUFFLE_BLUE + paquete [r];
+		puffles[g].color = IMG_PUFFLE_BLUE + paquete [g];
 		puffles[g].capturado = puffles[g].escapado = FALSE;
 		puffles[g].frame = 0;
 		puffles[g].dir = PUFFLE_DIR_0;
