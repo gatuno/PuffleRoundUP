@@ -58,6 +58,12 @@
 #define PUFFLE_TILE_HEIGHT 34
 #define PUFFLE_TILE_WIDTH 32
 
+#define WALL_X 296
+#define WALL_Y 248
+
+#define PUFFLE_PEN_X 301
+#define PUFFLE_PEN_Y 241
+
 /* Enumerar las imágenes */
 enum {
 	IMG_FONDO,
@@ -239,6 +245,8 @@ int game_loop (void) {
 	int mousex, mousey, dx, dy;
 	double incrementox, incrementoy;
 	int nextx, nexty, g;
+	Uint8 alpha, dummy;
+	Uint32 *pixel;
 	
 	Puffle puffles[10];
 	
@@ -264,31 +272,55 @@ int game_loop (void) {
 		
 		SDL_BlitSurface (images[IMG_FONDO], NULL, screen, NULL);
 		
+		rect.x = WALL_X;
+		rect.y = WALL_Y;
+		rect.w = images[IMG_WALL]->w;
+		rect.h = images[IMG_WALL]->h;
+		
+		SDL_BlitSurface (images[IMG_WALL], NULL, screen, &rect);
+		
+		rect.x = PUFFLE_PEN_X;
+		rect.y = PUFFLE_PEN_Y;
+		rect.w = images[IMG_PUFFLE_PEN]->w;
+		rect.h = images[IMG_PUFFLE_PEN]->h;
+		
+		SDL_BlitSurface (images[IMG_PUFFLE_PEN], NULL, screen, &rect);
+		
 		for (g = 0; g < 10; g++) {
 			if (!puffles[g].escapado) {
 				dx = mousex - puffles[g].x;
 				dy = mousey - puffles[g].y;
-			
+				
 				distancia = encontrar_distancia (dx, dy);
 			
 				if (distancia < puffles[g].distancia) {
+					if (distancia == 0.0) distancia = 0.1;
+					
 					incrementox = ((double) dx) / (distancia / ((double) puffles[g].velocidad));
 					incrementoy = ((double) dy) / (distancia / ((double) puffles[g].velocidad));
-				
 					nextx = puffles[g].x - incrementox;
 					nexty = puffles[g].y - incrementoy;
-				
+					
 					if (puffles[g].dir / 8 == 0) puffles[g].frame = 0;
 					puffles[g].dir = encontrar_angulo_y_dir (mousex, mousey, puffles[g].x, puffles[g].y) + 8;
-				
+					
 					/* Colisión contra el muro */
-				
+					if (nextx >= WALL_X && nextx < WALL_X + images[IMG_WALL]->w && nexty >= WALL_Y && nexty < WALL_Y + images[IMG_WALL]->h) {
+						pixel = images[IMG_WALL]->pixels + ((nexty - WALL_Y) * images[IMG_WALL]->pitch) + ((nextx - WALL_X) * images[IMG_WALL]->format->BytesPerPixel);
+						SDL_GetRGBA (*pixel, images[IMG_WALL]->format, &dummy, &dummy, &dummy, &alpha);
+						
+						if (alpha == SDL_ALPHA_OPAQUE) {
+							/* Colisión contra el muro, a rebotar */
+							nextx = puffles[g].x + (incrementox * 1.5);
+							nexty = puffles[g].y + (incrementoy * 1.5);
+						}
+					}
+					
 					/* Colisión contra el interior de la jaula, si no, capturado = FALSE */
-				
-				
+					
 					puffles[g].x = nextx;
 					puffles[g].y = nexty;
-				
+					
 					/* Colisión de salida */
 					if (nextx < 80 || nextx > 680 || nexty < 43 || nexty > 443) {
 						puffles[g].escapado = TRUE;
@@ -305,7 +337,7 @@ int game_loop (void) {
 				} else {
 					if (puffles[g].dir / 8 == 1) {
 						imagen = (puffles[g].dir - PUFFLE_WALK_0) * 12 + puffle_frame_jump[puffles[g].frame];
-				
+						
 						puffles[g].frame++;
 						/* Secuencia de brinco, si llegamos al final pasar a la otra animación */
 						if (puffle_frame_jump[puffles[g].frame] == -1) {
@@ -315,7 +347,7 @@ int game_loop (void) {
 					} else {
 						imagen = (puffles[g].dir * 4) + puffle_frame_normal[puffles[g].frame];
 						if (puffles[g].dir > PUFFLE_DIR_5) imagen -= 8;
-				
+						
 						puffles[g].frame++;
 						if (puffle_frame_normal[puffles[g].frame] == -1) {
 							puffles[g].frame = 0;
@@ -345,7 +377,6 @@ int game_loop (void) {
 /* Mattias Engdegard <f91-men@nada.kth.se> */
 SDL_Surface * set_video_mode (unsigned flags) {
 	/* Prefer 16bpp, but also prefer native modes to emulated 16bpp. */
-
 	int depth;
 
 	depth = SDL_VideoModeOK (760, 480, 16, flags);
@@ -432,7 +463,7 @@ inline double encontrar_distancia (int dx, int dy) {
 
 void acomodar_puffles (Puffle *puffles) {
 	int g, r;
-	int paquete[10] = {0, 0, 1, 1, 2, 2, 3, 3, 4, 4};
+	int paquete[10] = {0, 0, 1, 1, 2, 2, 0, 1, 2, 0};
 	int sel_mapa;
 	const int (*local_mapa)[2];
 	
