@@ -65,6 +65,9 @@ enum {
 	
 	IMG_PUFFLE_BLUE,
 	IMG_PUFFLE_PINK,
+	IMG_PUFFLE_GREEN,
+	IMG_PUFFLE_BLACK,
+	IMG_PUFFLE_PURPLE,
 	
 	IMG_PEN,
 	IMG_WALL,
@@ -78,6 +81,9 @@ const char *images_names[NUM_IMAGES] = {
 	
 	GAMEDATA_DIR "images/puffle-azul.png",
 	GAMEDATA_DIR "images/puffle-rosa.png",
+	GAMEDATA_DIR "images/puffle-verde.png",
+	GAMEDATA_DIR "images/puffle-negro.png",
+	GAMEDATA_DIR "images/puffle-morado.png",
 	
 	GAMEDATA_DIR "images/pen.png",
 	GAMEDATA_DIR "images/wall.png"
@@ -288,8 +294,8 @@ int game_loop (void) {
 						puffles[g].escapado = TRUE;
 						continue;
 					}
-				} else {
-					if (puffles[g].dir - 8 >= 0) puffles[g].dir -= 8;
+				/*} else {
+					if (puffles[g].dir - 8 >= 0) puffles[g].dir -= 8;*/
 				}
 				
 				/* Calcular la imagen para dibujar */
@@ -426,7 +432,7 @@ inline double encontrar_distancia (int dx, int dy) {
 
 void acomodar_puffles (Puffle *puffles) {
 	int g, r;
-	int paquete[10] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1};
+	int paquete[10] = {0, 0, 1, 1, 2, 2, 3, 3, 4, 4};
 	int sel_mapa;
 	const int (*local_mapa)[2];
 	
@@ -450,8 +456,8 @@ void acomodar_puffles (Puffle *puffles) {
 		puffles[g].capturado = puffles[g].escapado = FALSE;
 		puffles[g].frame = 0;
 		puffles[g].dir = PUFFLE_DIR_0;
-		puffles[g].distancia = puffle_data[paquete[r]][0];
-		puffles[g].velocidad = puffle_data[paquete[r]][1];
+		puffles[g].distancia = puffle_data[paquete[g]][0];
+		puffles[g].velocidad = puffle_data[paquete[g]][1];
 		puffles[g].x = local_mapa[g][0];
 		puffles[g].y = local_mapa[g][1];
 	}
