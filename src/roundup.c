@@ -58,11 +58,17 @@
 #define PUFFLE_TILE_HEIGHT 34
 #define PUFFLE_TILE_WIDTH 32
 
+/* X, Y donde los puffles realmente chocan. Invisible */
 #define WALL_X 296
 #define WALL_Y 248
 
+/* X, Y de la imagen. No utilizada para las colisiones */
 #define PUFFLE_PEN_X 301
 #define PUFFLE_PEN_Y 241
+
+/* X, Y de la zona "capturada". Zona invisible */
+#define PEN_X 340
+#define PEN_Y 271
 
 /* Enumerar las imágenes */
 enum {
@@ -247,10 +253,13 @@ int game_loop (void) {
 	int nextx, nexty, g;
 	Uint8 alpha, dummy;
 	Uint32 *pixel;
+	int capturados, escapados;
 	
 	Puffle puffles[10];
 	
 	acomodar_puffles (puffles);
+	capturados = escapados = 0;
+	printf ("Capturado: %i\n", puffles[0].capturado);
 	
 	SDL_EventState (SDL_MOUSEMOTION, SDL_IGNORE);
 	
@@ -286,7 +295,15 @@ int game_loop (void) {
 		
 		SDL_BlitSurface (images[IMG_PUFFLE_PEN], NULL, screen, &rect);
 		
-		for (g = 0; g < 10; g++) {
+		rect.x = PEN_X;
+		rect.y = PEN_Y;
+		rect.w = images[IMG_PEN]->w;
+		rect.h = images[IMG_PEN]->h;
+		
+		SDL_BlitSurface (images[IMG_PEN], NULL, screen, &rect);
+		
+		capturados = 0;
+		for (g = 0; g < 1; g++) {
 			if (!puffles[g].escapado) {
 				dx = mousex - puffles[g].x;
 				dy = mousey - puffles[g].y;
@@ -317,6 +334,15 @@ int game_loop (void) {
 					}
 					
 					/* Colisión contra el interior de la jaula, si no, capturado = FALSE */
+					if (nextx >= PEN_X && nextx < PEN_X + images[IMG_PEN]->w && nexty >= PEN_Y && nexty < PEN_Y + images[IMG_PEN]->h) {
+						if (!puffles[g].capturado) {
+							puffles[g].capturado = TRUE;
+							capturados++;
+							/* TODO: Reproducir sonido de capturado */
+						}
+					} else {
+						puffles[g].capturado = FALSE;
+					}
 					
 					puffles[g].x = nextx;
 					puffles[g].y = nexty;
@@ -324,11 +350,14 @@ int game_loop (void) {
 					/* Colisión de salida */
 					if (nextx < 80 || nextx > 680 || nexty < 43 || nexty > 443) {
 						puffles[g].escapado = TRUE;
+						escapados++;
 						continue;
 					}
 				/*} else {
 					if (puffles[g].dir - 8 >= 0) puffles[g].dir -= 8;*/
 				}
+				
+				if (puffles[g].capturado) capturados++;
 				
 				/* Calcular la imagen para dibujar */
 				if (puffles[g].dir == PUFFLE_DIR_3 || puffles[g].dir == PUFFLE_DIR_4 || puffles[g].dir == PUFFLE_DIR_5) {
@@ -362,6 +391,8 @@ int game_loop (void) {
 				copy_puffle_tile (puffles[g].color, &rect, imagen);
 			} /* Si no está escapado */
 		} /* Foreach puffles */
+		
+		/* TODO: Actualizar textos */
 		
 		SDL_Flip (screen);
 		
