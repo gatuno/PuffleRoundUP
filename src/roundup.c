@@ -66,9 +66,11 @@
 #define PUFFLE_PEN_X 301
 #define PUFFLE_PEN_Y 241
 
-/* X, Y de la zona "capturada". Zona invisible */
+/* Rectangulo de la zona "capturada". Zona invisible */
 #define PEN_X 340
 #define PEN_Y 271
+#define PEN_W 80
+#define PEN_H 97
 
 /* Enumerar las imágenes */
 enum {
@@ -81,8 +83,9 @@ enum {
 	IMG_PUFFLE_BLACK,
 	IMG_PUFFLE_PURPLE,
 	
-	IMG_PEN,
 	IMG_WALL,
+	
+	IMG_CLOCK,
 	
 	NUM_IMAGES
 };
@@ -97,8 +100,9 @@ const char *images_names[NUM_IMAGES] = {
 	GAMEDATA_DIR "images/puffle-negro.png",
 	GAMEDATA_DIR "images/puffle-morado.png",
 	
-	GAMEDATA_DIR "images/pen.png",
-	GAMEDATA_DIR "images/wall.png"
+	GAMEDATA_DIR "images/wall.png",
+	
+	GAMEDATA_DIR "images/reloj.png"
 };
 
 /* Enumerar las caras de los Puffles */
@@ -244,8 +248,8 @@ int game_loop (void) {
 	int done = 0;
 	SDL_Event event;
 	SDLKey key;
-	Uint32 last_time, now_time;
-	SDL_Rect rect;
+	Uint32 last_time, now_time, timer;
+	SDL_Rect rect, rect2;
 	int imagen;
 	double distancia;
 	int mousex, mousey, dx, dy;
@@ -258,8 +262,9 @@ int game_loop (void) {
 	Puffle puffles[10];
 	
 	acomodar_puffles (puffles);
+	timer = SDL_GetTicks ();
+	
 	capturados = escapados = 0;
-	printf ("Capturado: %i\n", puffles[0].capturado);
 	
 	SDL_EventState (SDL_MOUSEMOTION, SDL_IGNORE);
 	
@@ -281,12 +286,12 @@ int game_loop (void) {
 		
 		SDL_BlitSurface (images[IMG_FONDO], NULL, screen, NULL);
 		
-		rect.x = WALL_X;
+		/*rect.x = WALL_X;
 		rect.y = WALL_Y;
 		rect.w = images[IMG_WALL]->w;
 		rect.h = images[IMG_WALL]->h;
 		
-		SDL_BlitSurface (images[IMG_WALL], NULL, screen, &rect);
+		SDL_BlitSurface (images[IMG_WALL], NULL, screen, &rect);*/
 		
 		rect.x = PUFFLE_PEN_X;
 		rect.y = PUFFLE_PEN_Y;
@@ -295,15 +300,15 @@ int game_loop (void) {
 		
 		SDL_BlitSurface (images[IMG_PUFFLE_PEN], NULL, screen, &rect);
 		
-		rect.x = PEN_X;
+		/*rect.x = PEN_X;
 		rect.y = PEN_Y;
 		rect.w = images[IMG_PEN]->w;
 		rect.h = images[IMG_PEN]->h;
 		
-		SDL_BlitSurface (images[IMG_PEN], NULL, screen, &rect);
+		SDL_BlitSurface (images[IMG_PEN], NULL, screen, &rect);*/
 		
 		capturados = 0;
-		for (g = 0; g < 1; g++) {
+		for (g = 0; g < 10; g++) {
 			if (!puffles[g].escapado) {
 				dx = mousex - puffles[g].x;
 				dy = mousey - puffles[g].y;
@@ -334,7 +339,7 @@ int game_loop (void) {
 					}
 					
 					/* Colisión contra el interior de la jaula, si no, capturado = FALSE */
-					if (nextx >= PEN_X && nextx < PEN_X + images[IMG_PEN]->w && nexty >= PEN_Y && nexty < PEN_Y + images[IMG_PEN]->h) {
+					if (nextx >= PEN_X && nextx < PEN_X + PEN_W && nexty >= PEN_Y && nexty < PEN_Y + PEN_H) {
 						if (!puffles[g].capturado) {
 							puffles[g].capturado = TRUE;
 							capturados++;
@@ -393,12 +398,23 @@ int game_loop (void) {
 		} /* Foreach puffles */
 		
 		/* TODO: Actualizar textos */
+		now_time = SDL_GetTicks ();
+		g = 120 - (now_time - timer) / 1000;
+		
+		imagen = (120 - g) / 10;
+		rect.x = 671;
+		rect.y = 10;
+		rect.h = rect.w = rect2.w = rect2.h = 42;
+		
+		rect2.x = imagen * 42;
+		rect2.y = 0;
+		
+		SDL_BlitSurface (images[IMG_CLOCK], &rect2, screen, &rect);
 		
 		SDL_Flip (screen);
 		
 		now_time = SDL_GetTicks ();
 		if (now_time < last_time + FPS) SDL_Delay(last_time + FPS - now_time);
-		
 	} while (!done);
 	
 	return done;
