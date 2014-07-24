@@ -232,6 +232,7 @@ typedef struct {
 /* Prototipos de función */
 int game_intro (void);
 int game_loop (void);
+int game_score (int segundos, int capturados, int *total_coins);
 void setup (void);
 SDL_Surface * set_video_mode(unsigned);
 void copy_puffle_tile (int puffle_tiles, SDL_Rect *rect, int tile);
@@ -342,6 +343,7 @@ int game_loop (void) {
 	Uint8 alpha, dummy;
 	Uint32 *pixel;
 	int capturados, escapados;
+	int monedas = 0;
 	
 	Puffle puffles[10];
 	
@@ -494,6 +496,83 @@ int game_loop (void) {
 		rect2.y = 0;
 		
 		SDL_BlitSurface (images[IMG_CLOCK], &rect2, screen, &rect);
+		
+		SDL_Flip (screen);
+		
+		if (capturados + escapados == 10 || g < 0) {
+			/* Correr la pantalla de resultados */
+			done = game_score (g, capturados, &monedas);
+			if (done == GAME_CONTINUE) done = GAME_NONE;
+			
+			/* Regenerar los puffles */
+			acomodar_puffles (puffles);
+			timer = SDL_GetTicks ();
+	
+			capturados = escapados = 0;
+		}
+		
+		now_time = SDL_GetTicks ();
+		if (now_time < last_time + FPS) SDL_Delay(last_time + FPS - now_time);
+	} while (!done);
+	
+	return done;
+}
+
+int game_score (int segundos, int capturados, int *total_coins) {
+	int done = 0;
+	SDL_Event event;
+	SDLKey key;
+	SDL_Rect rect;
+	Uint32 last_time, now_time;
+	//int last_button = BUTTON_NONE, old_map = BUTTON_NONE, map;
+	
+	int score, coins;
+	
+	score = segundos * capturados;
+	coins = score / 10;
+	*total_coins = *total_coins + coins;
+	
+	SDL_BlitSurface (images[IMG_FONDO], NULL, screen, NULL);
+	
+	/* Copiar la pantalla de introducción */
+	rect.x = 204;
+	rect.y = 57;
+	rect.w = images[IMG_INTRO]->w;
+	rect.h = images[IMG_INTRO]->h;
+	
+	/* Dibujar los textos */
+	SDL_BlitSurface (images[IMG_INTRO], NULL, screen, &rect);
+	
+	do {
+		last_time = SDL_GetTicks ();
+		
+		while (SDL_PollEvent(&event) > 0) {
+			switch (event.type) {
+				case SDL_QUIT:
+					/* Vamos a cerrar la aplicación */
+					done = GAME_QUIT;
+					break;
+				case SDL_MOUSEMOTION:
+					break;
+				case SDL_MOUSEBUTTONDOWN:
+					/* Tengo un Mouse Down */
+					break;
+				case SDL_MOUSEBUTTONUP:
+					/* Tengo un mouse Up */
+					break;
+				case SDL_KEYDOWN:
+					if (event.key.keysym.sym == SDLK_ESCAPE) {
+						done = GAME_QUIT;
+					}
+					if (event.key.keysym.sym == SDLK_c) {
+						done = GAME_CONTINUE;
+					}
+					if (event.key.keysym.sym == SDLK_f) {
+						done = GAME_QUIT;
+					}
+				break;
+			}
+		}
 		
 		SDL_Flip (screen);
 		
