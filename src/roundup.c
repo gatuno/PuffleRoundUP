@@ -75,6 +75,11 @@
 /* Enumerar las imágenes */
 enum {
 	IMG_FONDO,
+	
+	IMG_INTRO,
+	IMG_PUFFLE_INTRO,
+	IMG_INTRO_CAGE,
+	
 	IMG_PUFFLE_PEN,
 	
 	IMG_PUFFLE_BLUE,
@@ -92,6 +97,11 @@ enum {
 
 const char *images_names[NUM_IMAGES] = {
 	GAMEDATA_DIR "images/fondo.png",
+	
+	GAMEDATA_DIR "images/intro.png",
+	GAMEDATA_DIR "images/puffle-intro.png",
+	GAMEDATA_DIR "images/title-cage.png",
+	
 	GAMEDATA_DIR "images/puffle-pen.png",
 	
 	GAMEDATA_DIR "images/puffle-azul.png",
@@ -220,6 +230,7 @@ typedef struct {
 } Puffle;
 
 /* Prototipos de función */
+int game_intro (void);
 int game_loop (void);
 void setup (void);
 SDL_Surface * set_video_mode(unsigned);
@@ -237,11 +248,84 @@ int main (int argc, char *argv[]) {
 	setup ();
 	
 	do {
+		if (game_intro () == GAME_QUIT) break;
 		if (game_loop () == GAME_QUIT) break;
 	} while (1 == 0);
 	
 	SDL_Quit ();
 	return EXIT_SUCCESS;
+}
+
+int game_intro (void) {
+	int done = 0;
+	SDL_Event event;
+	SDLKey key;
+	SDL_Rect rect;
+	Uint32 last_time, now_time;
+	//int last_button = BUTTON_NONE, old_map = BUTTON_NONE, map;
+	
+	SDL_BlitSurface (images[IMG_FONDO], NULL, screen, NULL);
+	
+	/* Copiar la pantalla de introducción */
+	rect.x = 204;
+	rect.y = 57;
+	rect.w = images[IMG_INTRO]->w;
+	rect.h = images[IMG_INTRO]->h;
+	
+	SDL_BlitSurface (images[IMG_INTRO], NULL, screen, &rect);
+	
+	/* Copiar el puffle */
+	rect.x = 242;
+	rect.y = 156;
+	rect.w = images[IMG_PUFFLE_INTRO]->w;
+	rect.h = images[IMG_PUFFLE_INTRO]->h;
+	
+	SDL_BlitSurface (images[IMG_PUFFLE_INTRO], NULL, screen, &rect);
+	
+	/* Copiar la jaula */
+	rect.x = 422;
+	rect.y = 204;
+	rect.w = images[IMG_INTRO_CAGE]->w;
+	rect.h = images[IMG_INTRO_CAGE]->h;
+	
+	SDL_BlitSurface (images[IMG_INTRO_CAGE], NULL, screen, &rect);
+	
+	do {
+		last_time = SDL_GetTicks ();
+		
+		while (SDL_PollEvent(&event) > 0) {
+			/* fprintf (stdout, "Evento: %i\n", event.type);*/
+			switch (event.type) {
+				case SDL_QUIT:
+					/* Vamos a cerrar la aplicación */
+					done = GAME_QUIT;
+					break;
+				case SDL_MOUSEMOTION:
+					break;
+				case SDL_MOUSEBUTTONDOWN:
+					/* Tengo un Mouse Down */
+					break;
+				case SDL_MOUSEBUTTONUP:
+					/* Tengo un mouse Up */
+					break;
+				case SDL_KEYDOWN:
+					if (event.key.keysym.sym == SDLK_ESCAPE) {
+						done = GAME_QUIT;
+					}
+					if (event.key.keysym.sym == SDLK_c) {
+						done = GAME_CONTINUE;
+					}
+				break;
+			}
+		}
+		
+		SDL_Flip (screen);
+		
+		now_time = SDL_GetTicks ();
+		if (now_time < last_time + FPS) SDL_Delay(last_time + FPS - now_time);
+	} while (!done);
+	
+	return done;
 }
 
 int game_loop (void) {
