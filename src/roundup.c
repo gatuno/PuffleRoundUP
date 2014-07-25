@@ -486,6 +486,9 @@ int game_loop (void) {
 	int capturados, escapados;
 	int monedas = 0;
 	int last_button = BUTTON_NONE, old_map = BUTTON_NONE, map;
+	char buf[10];
+	SDL_Surface *text;
+	SDL_Color blanco = {255, 255, 255, 0}, negro = {0, 0, 0, 0};
 	
 	Puffle puffles[10];
 	
@@ -662,7 +665,30 @@ int game_loop (void) {
 		
 		SDL_BlitSurface (images[cp_button_frames[BUTTON_CLOSE]], NULL, screen, &rect);
 		
-		/* TODO: Actualizar textos */
+		/* Actualizar los textos de capturados y escapados */
+		sprintf (buf, "%i", capturados);
+		text = draw_text_with_shadow (ttf14_normal, 2, buf, &blanco, &negro);
+		
+		rect.x = 156;
+		rect.y = 8;
+		rect.w = text->w;
+		rect.h = text->h;
+		SDL_BlitSurface (text, NULL, screen, &rect);
+		
+		SDL_FreeSurface (text);
+		
+		sprintf (buf, "%i", escapados);
+		text = draw_text_with_shadow (ttf14_normal, 2, buf, &blanco, &negro);
+		
+		rect.x = 156;
+		rect.y = 28;
+		rect.w = text->w;
+		rect.h = text->h;
+		SDL_BlitSurface (text, NULL, screen, &rect);
+		
+		SDL_FreeSurface (text);
+		
+		/* Actualizar el reloj */
 		now_time = SDL_GetTicks ();
 		g = 120 - (now_time - timer) / 1000;
 		
@@ -675,6 +701,18 @@ int game_loop (void) {
 		rect2.y = 0;
 		
 		SDL_BlitSurface (images[IMG_CLOCK], &rect2, screen, &rect);
+		
+		/* Reimprimir los segundos restantes */
+		sprintf (buf, "%i", g);
+		text = TTF_RenderUTF8_Blended (ttf14_normal, buf, negro);
+		
+		rect.y = 24;
+		rect.x = 692 - (text->w / 2);
+		rect.w = text->w;
+		rect.h = text->h;
+		SDL_BlitSurface (text, NULL, screen, &rect);
+		
+		SDL_FreeSurface (text);
 		
 		SDL_Flip (screen);
 		
