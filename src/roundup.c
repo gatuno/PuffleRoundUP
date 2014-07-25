@@ -288,6 +288,7 @@ int encontrar_angulo_y_dir (int x1, int y1, int x2, int y2);
 void acomodar_puffles (Puffle *puffles);
 inline int map_button_in_opening (int x, int y);
 inline int map_button_in_game (int x, int y);
+inline int map_button_in_score (int x, int y);
 
 /* Variables globales */
 SDL_Surface * screen;
@@ -322,7 +323,7 @@ int game_intro (void) {
 	SDLKey key;
 	SDL_Rect rect;
 	Uint32 last_time, now_time;
-	int last_button = BUTTON_NONE, old_map = BUTTON_NONE, map;
+	int map;
 	Uint32 color;
 	SDL_Surface *trans;
 	
@@ -476,6 +477,7 @@ int game_loop (void) {
 	SDLKey key;
 	Uint32 last_time, now_time, timer;
 	SDL_Rect rect, rect2;
+	int map;
 	int imagen;
 	double distancia;
 	int mousex, mousey, dx, dy;
@@ -485,7 +487,6 @@ int game_loop (void) {
 	Uint32 *pixel;
 	int capturados, escapados;
 	int monedas = 0;
-	int last_button = BUTTON_NONE, old_map = BUTTON_NONE, map;
 	char buf[10];
 	SDL_Surface *text;
 	SDL_Color blanco = {255, 255, 255, 0}, negro = {0, 0, 0, 0};
@@ -741,7 +742,10 @@ int game_score (int segundos, int capturados, int *total_coins) {
 	SDLKey key;
 	SDL_Rect rect;
 	Uint32 last_time, now_time;
-	//int last_button = BUTTON_NONE, old_map = BUTTON_NONE, map;
+	int map;
+	char buf[10];
+	SDL_Surface *text;
+	SDL_Color negro = {0, 0, 0, 0};
 	
 	int score, coins;
 	
@@ -757,8 +761,94 @@ int game_score (int segundos, int capturados, int *total_coins) {
 	rect.w = images[IMG_INTRO]->w;
 	rect.h = images[IMG_INTRO]->h;
 	
-	/* Dibujar los textos */
 	SDL_BlitSurface (images[IMG_INTRO], NULL, screen, &rect);
+	
+	/* El botón de cierre */
+	rect.x = 720;
+	rect.y = 12;
+	rect.w = images[IMG_BUTTON_CLOSE_UP]->w;
+	rect.h = images[IMG_BUTTON_CLOSE_UP]->h;
+	SDL_BlitSurface (images[IMG_BUTTON_CLOSE_UP], NULL, screen, &rect);
+	
+	/* Dibujar los textos */
+	rect.w = texts[TEXT_SCORE]->w;
+	rect.h = texts[TEXT_SCORE]->h;
+	rect.x = 246 + (269 - rect.w) / 2;
+	rect.y = 89;
+	SDL_BlitSurface (texts[TEXT_SCORE], NULL, screen, &rect);
+	
+	/* Segundos restantes */
+	sprintf (buf, "%i SECONDS LEFT", segundos);
+	text = TTF_RenderUTF8_Blended (ttf14_normal, buf, negro);
+	
+	rect.y = 126;
+	rect.x = 232 + (295 - text->w) / 2;
+	rect.w = text->w;
+	rect.h = text->h;
+	SDL_BlitSurface (text, NULL, screen, &rect);
+	
+	SDL_FreeSurface (text);
+	
+	/* La "x" */
+	text = TTF_RenderUTF8_Blended (ttf12_normal, buf, negro);
+	
+	rect.y = 142;
+	rect.x = 232 + (295 - text->w) / 2;
+	rect.w = text->w;
+	rect.h = text->h;
+	SDL_BlitSurface (text, NULL, screen, &rect);
+	
+	SDL_FreeSurface (text);
+	
+	/* Puffles capturados */
+	sprintf (buf, "%i PUFFLES CAUGHT =", capturados);
+	text = TTF_RenderUTF8_Blended (ttf14_normal, buf, negro);
+	
+	rect.y = 159;
+	rect.x = 232 + (295 - text->w) / 2;
+	rect.w = text->w;
+	rect.h = text->h;
+	SDL_BlitSurface (text, NULL, screen, &rect);
+	
+	SDL_FreeSurface (text);
+	
+	/* Total score */
+	sprintf (buf, "TOTAL SCORE: %i", score);
+	text = TTF_RenderUTF8_Blended (ttf12_normal, buf, negro);
+	
+	rect.y = 201;
+	rect.x = 232 + (295 - text->w) / 2;
+	rect.w = text->w;
+	rect.h = text->h;
+	SDL_BlitSurface (text, NULL, screen, &rect);
+	
+	SDL_FreeSurface (text);
+	
+	/* Monedas en este round */
+	sprintf (buf, "COINS THIS ROUND: %i", coins);
+	text = TTF_RenderUTF8_Blended (ttf12_normal, buf, negro);
+	
+	rect.y = 220;
+	rect.x = 232 + (295 - text->w) / 2;
+	rect.w = text->w;
+	rect.h = text->h;
+	SDL_BlitSurface (text, NULL, screen, &rect);
+	
+	SDL_FreeSurface (text);
+	
+	/* Monedas totales */
+	sprintf (buf, "TOTAL COINS: %i", *total_coins);
+	text = TTF_RenderUTF8_Blended (ttf14_normal, buf, negro);
+	
+	rect.y = 246;
+	rect.x = 232 + (295 - text->w) / 2;
+	rect.w = text->w;
+	rect.h = text->h;
+	SDL_BlitSurface (text, NULL, screen, &rect);
+	
+	SDL_FreeSurface (text);
+	
+	SDL_EventState (SDL_MOUSEMOTION, SDL_ENABLE);
 	
 	do {
 		last_time = SDL_GetTicks ();
@@ -770,12 +860,35 @@ int game_score (int segundos, int capturados, int *total_coins) {
 					done = GAME_QUIT;
 					break;
 				case SDL_MOUSEMOTION:
+					map = map_button_in_score (event.motion.x, event.motion.y);
+					cp_button_motion (map);
 					break;
 				case SDL_MOUSEBUTTONDOWN:
-					/* Tengo un Mouse Down */
+					map = map_button_in_score (event.button.x, event.button.y);
+					cp_button_down (map);
+					if (map == BUTTON_UI_PLAY_MORE) {
+						//if (use_sound) Mix_PlayChannel (-1, sounds[SND_BUTTON], 0);
+					}
+					
+					if (map == BUTTON_UI_FINISH) {
+						
+					}
 					break;
 				case SDL_MOUSEBUTTONUP:
-					/* Tengo un mouse Up */
+					map = map_button_in_score (event.button.x, event.button.y);
+					map = cp_button_up (map);
+					
+					switch (map) {
+						case BUTTON_UI_PLAY_MORE:
+							done = GAME_CONTINUE;
+							break;
+						case BUTTON_UI_FINISH:
+							done = GAME_QUIT;
+							break;
+						case BUTTON_CLOSE:
+							done = GAME_QUIT;
+							break;
+					}
 					break;
 				case SDL_KEYDOWN:
 					if (event.key.keysym.sym == SDLK_ESCAPE) {
@@ -791,11 +904,25 @@ int game_score (int segundos, int capturados, int *total_coins) {
 			}
 		}
 		
+		if (cp_button_refresh[BUTTON_CLOSE]) {
+			rect.x = 720;
+			rect.y = 12;
+			rect.w = images[IMG_BUTTON_CLOSE_UP]->w;
+			rect.h = images[IMG_BUTTON_CLOSE_UP]->h;
+			
+			SDL_BlitSurface (images[IMG_FONDO], &rect, screen, &rect);
+			
+			SDL_BlitSurface (images[cp_button_frames[BUTTON_CLOSE]], NULL, screen, &rect);
+			cp_button_refresh[BUTTON_CLOSE] = 0;
+		}
+		
 		SDL_Flip (screen);
 		
 		now_time = SDL_GetTicks ();
 		if (now_time < last_time + FPS) SDL_Delay(last_time + FPS - now_time);
 	} while (!done);
+	
+	SDL_EventState (SDL_MOUSEMOTION, SDL_IGNORE);
 	
 	return done;
 }
@@ -1036,6 +1163,11 @@ int map_button_in_opening (int x, int y) {
 }
 
 int map_button_in_game (int x, int y) {
+	if (x >= 720 && x < 749 && y >= 12 && y < 41) return BUTTON_CLOSE;
+	return BUTTON_NONE;
+}
+
+int map_button_in_score (int x, int y) {
 	if (x >= 720 && x < 749 && y >= 12 && y < 41) return BUTTON_CLOSE;
 	return BUTTON_NONE;
 }
