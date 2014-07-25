@@ -11,5 +11,8 @@ nobase_dist_gamedata_DATA = images/fondo.png \
 	images/puffle-morado.png \
 	images/puffle-pen.png \
 	images/wall.png \
-	images/reloj.png
+	images/reloj.png \
+	images/boton-close-over.png \
+	images/boton-close-up.png \
+	images/boton-close-down.png
 

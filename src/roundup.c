@@ -42,6 +42,8 @@
 #include "config.h"
 #endif
 
+#include "cp-button.h"
+
 #define FPS (1000/24)
 
 #define SWAP(a, b, t) ((t) = (a), (a) = (b), (b) = (t))
@@ -82,6 +84,10 @@ enum {
 	
 	IMG_PUFFLE_PEN,
 	
+	IMG_BUTTON_CLOSE_UP,
+	IMG_BUTTON_CLOSE_OVER,
+	IMG_BUTTON_CLOSE_DOWN,
+	
 	IMG_PUFFLE_BLUE,
 	IMG_PUFFLE_PINK,
 	IMG_PUFFLE_GREEN,
@@ -103,6 +109,10 @@ const char *images_names[NUM_IMAGES] = {
 	GAMEDATA_DIR "images/title-cage.png",
 	
 	GAMEDATA_DIR "images/puffle-pen.png",
+	
+	GAMEDATA_DIR "images/boton-close-up.png",
+	GAMEDATA_DIR "images/boton-close-over.png",
+	GAMEDATA_DIR "images/boton-close-down.png",
 	
 	GAMEDATA_DIR "images/puffle-azul.png",
 	GAMEDATA_DIR "images/puffle-rosa.png",
@@ -176,6 +186,24 @@ const int puffle_frame_jump [13] = {
 	-1
 };
 
+/* Para el motor de botones */
+enum {
+	BUTTON_NONE,
+	
+	BUTTON_CLOSE,
+	BUTTON_UI_START,
+	BUTTON_UI_PLAY_MORE,
+	BUTTON_UI_FINISH,
+	
+	NUM_BUTTONS
+};
+
+enum {
+	BLANK_UP,
+	BLANK_OVER,
+	BLANK_DOWN
+};
+
 /* Codigos de salida */
 enum {
 	GAME_NONE = 0, /* No usado */
@@ -239,14 +267,22 @@ void copy_puffle_tile (int puffle_tiles, SDL_Rect *rect, int tile);
 double encontrar_distancia (int dx, int dy);
 int encontrar_angulo_y_dir (int x1, int y1, int x2, int y2);
 void acomodar_puffles (Puffle *puffles);
+inline int map_button_in_opening (int x, int y);
+inline int map_button_in_game (int x, int y);
 
 /* Variables globales */
 SDL_Surface * screen;
 SDL_Surface * images [NUM_IMAGES];
 
 int main (int argc, char *argv[]) {
-	
 	setup ();
+	
+	cp_registrar_botones (NUM_BUTTONS);
+	cp_registrar_boton (BUTTON_CLOSE, IMG_BUTTON_CLOSE_UP);
+	cp_registrar_boton (BUTTON_UI_START, BLANK_UP);
+	cp_registrar_boton (BUTTON_UI_PLAY_MORE, BLANK_UP);
+	cp_registrar_boton (BUTTON_UI_FINISH, BLANK_UP);
+	cp_button_start ();
 	
 	do {
 		if (game_intro () == GAME_QUIT) break;
@@ -263,7 +299,7 @@ int game_intro (void) {
 	SDLKey key;
 	SDL_Rect rect;
 	Uint32 last_time, now_time;
-	//int last_button = BUTTON_NONE, old_map = BUTTON_NONE, map;
+	int last_button = BUTTON_NONE, old_map = BUTTON_NONE, map;
 	
 	SDL_BlitSurface (images[IMG_FONDO], NULL, screen, NULL);
 	
@@ -291,6 +327,13 @@ int game_intro (void) {
 	
 	SDL_BlitSurface (images[IMG_INTRO_CAGE], NULL, screen, &rect);
 	
+	/* El botón de cierre */
+	rect.x = 720;
+	rect.y = 12;
+	rect.w = images[IMG_BUTTON_CLOSE_UP]->w;
+	rect.h = images[IMG_BUTTON_CLOSE_UP]->h;
+	SDL_BlitSurface (images[IMG_BUTTON_CLOSE_UP], NULL, screen, &rect);
+	
 	do {
 		last_time = SDL_GetTicks ();
 		
@@ -302,12 +345,28 @@ int game_intro (void) {
 					done = GAME_QUIT;
 					break;
 				case SDL_MOUSEMOTION:
+					map = map_button_in_opening (event.motion.x, event.motion.y);
+					cp_button_motion (map);
 					break;
 				case SDL_MOUSEBUTTONDOWN:
-					/* Tengo un Mouse Down */
+					map = map_button_in_opening (event.button.x, event.button.y);
+					cp_button_down (map);
+					if (map == BUTTON_UI_START) {
+						//if (use_sound) Mix_PlayChannel (-1, sounds[SND_BUTTON], 0);
+					}
 					break;
 				case SDL_MOUSEBUTTONUP:
-					/* Tengo un mouse Up */
+					map = map_button_in_opening (event.button.x, event.button.y);
+					map = cp_button_up (map);
+					
+					switch (map) {
+						case BUTTON_UI_START:
+							done = GAME_CONTINUE;
+							break;
+						case BUTTON_CLOSE:
+							done = GAME_QUIT;
+							break;
+					}
 					break;
 				case SDL_KEYDOWN:
 					if (event.key.keysym.sym == SDLK_ESCAPE) {
@@ -318,6 +377,18 @@ int game_intro (void) {
 					}
 				break;
 			}
+		}
+		
+		if (cp_button_refresh[BUTTON_CLOSE]) {
+			rect.x = 720;
+			rect.y = 12;
+			rect.w = images[IMG_BUTTON_CLOSE_UP]->w;
+			rect.h = images[IMG_BUTTON_CLOSE_UP]->h;
+			
+			SDL_BlitSurface (images[IMG_FONDO], &rect, screen, &rect);
+			
+			SDL_BlitSurface (images[cp_button_frames[BUTTON_CLOSE]], NULL, screen, &rect);
+			cp_button_refresh[BUTTON_CLOSE] = 0;
 		}
 		
 		SDL_Flip (screen);
@@ -344,6 +415,7 @@ int game_loop (void) {
 	Uint32 *pixel;
 	int capturados, escapados;
 	int monedas = 0;
+	int last_button = BUTTON_NONE, old_map = BUTTON_NONE, map;
 	
 	Puffle puffles[10];
 	
@@ -363,12 +435,29 @@ int game_loop (void) {
 					/* Vamos a cerrar la aplicación */
 					done = GAME_QUIT;
 					break;
+				case SDL_MOUSEBUTTONDOWN:
+					map = map_button_in_game (event.button.x, event.button.y);
+					cp_button_down (map);
+					break;
+				case SDL_MOUSEBUTTONUP:
+					map = map_button_in_game (event.button.x, event.button.y);
+					map = cp_button_up (map);
+					
+					switch (map) {
+						case BUTTON_CLOSE:
+							done = GAME_QUIT;
+							break;
+					}
+					break;
 				case SDL_KEYDOWN:
 					break;
 			}
 		}
 		
 		SDL_GetMouseState (&mousex, &mousey);
+		
+		map = map_button_in_game (mousex, mousey);
+		cp_button_motion (map);
 		
 		SDL_BlitSurface (images[IMG_FONDO], NULL, screen, NULL);
 		
@@ -428,7 +517,6 @@ int game_loop (void) {
 					if (nextx >= PEN_X && nextx < PEN_X + PEN_W && nexty >= PEN_Y && nexty < PEN_Y + PEN_H) {
 						if (!puffles[g].capturado) {
 							puffles[g].capturado = TRUE;
-							capturados++;
 							/* TODO: Reproducir sonido de capturado */
 						}
 					} else {
@@ -482,6 +570,14 @@ int game_loop (void) {
 				copy_puffle_tile (puffles[g].color, &rect, imagen);
 			} /* Si no está escapado */
 		} /* Foreach puffles */
+		
+		/* Redibujar el botón de cierre */
+		rect.x = 720;
+		rect.y = 12;
+		rect.w = images[IMG_BUTTON_CLOSE_UP]->w;
+		rect.h = images[IMG_BUTTON_CLOSE_UP]->h;
+		
+		SDL_BlitSurface (images[cp_button_frames[BUTTON_CLOSE]], NULL, screen, &rect);
 		
 		/* TODO: Actualizar textos */
 		now_time = SDL_GetTicks ();
@@ -702,4 +798,15 @@ void acomodar_puffles (Puffle *puffles) {
 		puffles[g].x = local_mapa[g][0];
 		puffles[g].y = local_mapa[g][1];
 	}
+}
+
+int map_button_in_opening (int x, int y) {
+	if (x >= 403 && x < 541 && y >= 277 && y < 314) return BUTTON_UI_START;
+	if (x >= 720 && x < 749 && y >= 12 && y < 41) return BUTTON_CLOSE;
+	return BUTTON_NONE;
+}
+
+int map_button_in_game (int x, int y) {
+	if (x >= 720 && x < 749 && y >= 12 && y < 41) return BUTTON_CLOSE;
+	return BUTTON_NONE;
 }
