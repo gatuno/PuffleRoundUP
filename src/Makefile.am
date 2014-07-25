@@ -3,8 +3,8 @@
 gamedatadir = $(pkgdatadir)/data
 
 bin_PROGRAMS = puffle-roundup
-puffle_roundup_SOURCES = roundup.c cp-button.c
-EXTRA_DIST = cp-button.h
+puffle_roundup_SOURCES = roundup.c cp-button.c draw-text.c
+EXTRA_DIST = cp-button.h draw-text.h
 
 puffle_roundup_CPPFLAGS = -DGAMEDATA_DIR=\"$(gamedatadir)/\" -DLOCALEDIR=\"$(localedir)\" $(AM_CPPFLAGS)
 puffle_roundup_CFLAGS = $(SDL_CFLAGS) $(SDL_image_CFLAGS) $(SDL_mixer_CFLAGS) $(SDL_ttf_LIBS) $(AM_CFLAGS)

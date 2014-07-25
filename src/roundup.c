@@ -37,12 +37,14 @@
 
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #include "cp-button.h"
+#include "draw-text.h"
 
 #define FPS (1000/24)
 
@@ -211,6 +213,23 @@ enum {
 	GAME_QUIT
 };
 
+enum {
+	TEXT_TITLE,
+	TEXT_PLAY_TITLE,
+	TEXT_INSTRUCTIONS,
+	TEXT_INSTRUCTIONS_2,
+	TEXT_SCORING,
+	TEXT_SCORING_2,
+	TEXT_PLAY_2,
+	TEXT_CAUGHT,
+	TEXT_ESCAPED,
+	TEXT_SCORE,
+	TEXT_PLAYMORE,
+	TEXT_FINISH,
+	
+	NUM_TEXTS
+};
+
 /* La meta información de los puffles */
 const int puffle_data[10][2] = { /* {distancia, velocidad} */
 	{45, 7},   /* Puffle puffles[g] */
@@ -273,6 +292,10 @@ inline int map_button_in_game (int x, int y);
 /* Variables globales */
 SDL_Surface * screen;
 SDL_Surface * images [NUM_IMAGES];
+SDL_Surface *texts [NUM_TEXTS];
+
+TTF_Font *ttf14_outline, *ttf14_normal;
+TTF_Font *ttf12_normal;
 
 int main (int argc, char *argv[]) {
 	setup ();
@@ -300,6 +323,13 @@ int game_intro (void) {
 	SDL_Rect rect;
 	Uint32 last_time, now_time;
 	int last_button = BUTTON_NONE, old_map = BUTTON_NONE, map;
+	Uint32 color;
+	SDL_Surface *trans;
+	
+	color = SDL_MapRGB (screen->format, 255, 255, 255);
+	trans = SDL_CreateRGBSurface (SDL_SWSURFACE | SDL_SRCALPHA, 138, 37, 32, 0, 0, 0, 0);
+	SDL_FillRect (trans, NULL, color); /* Blanco */
+	SDL_SetAlpha (trans, SDL_SRCALPHA, 128); /* Alpha al 50 % */
 	
 	SDL_BlitSurface (images[IMG_FONDO], NULL, screen, NULL);
 	
@@ -333,6 +363,20 @@ int game_intro (void) {
 	rect.w = images[IMG_BUTTON_CLOSE_UP]->w;
 	rect.h = images[IMG_BUTTON_CLOSE_UP]->h;
 	SDL_BlitSurface (images[IMG_BUTTON_CLOSE_UP], NULL, screen, &rect);
+	
+	/* Copiar el titulo del juego */
+	rect.w = texts[TEXT_TITLE]->w;
+	rect.x = 231 + (296 - rect.w) / 2;
+	rect.y = 83;
+	rect.h = texts[TEXT_TITLE]->h;
+	SDL_BlitSurface (texts[TEXT_TITLE], NULL, screen, &rect);
+	
+	/* El texto de play del botón */
+	rect.w = texts[TEXT_PLAY_TITLE]->w;
+	rect.x = 392 + (134 - rect.w) / 2;
+	rect.y = 279;
+	rect.h = texts[TEXT_PLAY_TITLE]->h;
+	SDL_BlitSurface (texts[TEXT_PLAY_TITLE], NULL, screen, &rect);
 	
 	do {
 		last_time = SDL_GetTicks ();
@@ -391,12 +435,38 @@ int game_intro (void) {
 			cp_button_refresh[BUTTON_CLOSE] = 0;
 		}
 		
+		if (cp_button_refresh[BUTTON_UI_START]) {
+			/* Borrar el fondo con blanco */
+			rect.x = 388;
+			rect.y = 277;
+			rect.w = 138;
+			rect.h = 37;
+			
+			SDL_FillRect (screen, &rect, color);
+			
+			/* El texto de play del botón */
+			rect.w = texts[TEXT_PLAY_TITLE]->w;
+			rect.x = 392 + (134 - rect.w) / 2;
+			rect.y = 279;
+			rect.h = texts[TEXT_PLAY_TITLE]->h;
+			SDL_BlitSurface (texts[TEXT_PLAY_TITLE], NULL, screen, &rect);
+			
+			if (cp_button_frames[BUTTON_UI_START] != BLANK_UP) {
+				rect.x = 388;
+				rect.y = 277;
+				rect.w = 138;
+				rect.h = 37;
+				
+				SDL_BlitSurface (trans, NULL, screen, &rect);
+			}
+		}
 		SDL_Flip (screen);
 		
 		now_time = SDL_GetTicks ();
 		if (now_time < last_time + FPS) SDL_Delay(last_time + FPS - now_time);
 	} while (!done);
 	
+	SDL_FreeSurface (trans);
 	return done;
 }
 
@@ -481,6 +551,19 @@ int game_loop (void) {
 		rect.h = images[IMG_PEN]->h;
 		
 		SDL_BlitSurface (images[IMG_PEN], NULL, screen, &rect);*/
+		
+		/* Imprimir los textos de capturado y escapados */
+		rect.w = texts[TEXT_CAUGHT]->w;
+		rect.h = texts[TEXT_CAUGHT]->h;
+		rect.x = 4 + (151 - rect.w);
+		rect.y = 8;
+		SDL_BlitSurface (texts[TEXT_CAUGHT], NULL, screen, &rect);
+		
+		rect.w = texts[TEXT_ESCAPED]->w;
+		rect.h = texts[TEXT_ESCAPED]->h;
+		rect.x = 4 + (151 - rect.w);
+		rect.y = 28;
+		SDL_BlitSurface (texts[TEXT_ESCAPED], NULL, screen, &rect);
 		
 		capturados = 0;
 		for (g = 0; g < 10; g++) {
@@ -692,6 +775,8 @@ SDL_Surface * set_video_mode (unsigned flags) {
 void setup (void) {
 	SDL_Surface * image;
 	int g;
+	TTF_Font *font_normal;
+	SDL_Color blanco = {255, 255, 255, 0}, negro = {0, 0, 0, 0}, otro;
 	
 	/* Inicializar el Video SDL */
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -729,6 +814,112 @@ void setup (void) {
 		images[g] = image;
 		/* TODO: Mostrar la carga de porcentaje */
 	}
+	
+	if (TTF_Init () < 0) {
+		fprintf (stderr,
+			"Error: Can't initialize the SDL TTF library\n"
+			"%s\n", TTF_GetError ());
+		SDL_Quit ();
+		exit (1);
+	}
+	
+	/* Generar todos los textos */
+	font_normal = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 28);
+	
+	if (!font_normal) {
+		fprintf (stderr,
+			"Failed to load font file 'CCFaceFront'\n"
+			"The error returned by SDL is:\n"
+			"%s\n", TTF_GetError ());
+		SDL_Quit ();
+		exit (1);
+	}
+	
+	TTF_SetFontStyle (font_normal, TTF_STYLE_ITALIC);
+	
+	texts [TEXT_TITLE] = draw_text_with_shadow (font_normal, 3, "PUFFLE ROUNDUP", &blanco, &negro);
+	
+	TTF_CloseFont (font_normal);
+	
+	/* Botón play de 22 puntos en la pantalla de bienvenida */
+	font_normal = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 22);
+	
+	if (!font_normal) {
+		fprintf (stderr,
+			"Failed to load font file 'CCFaceFront'\n"
+			"The error returned by SDL is:\n"
+			"%s\n", TTF_GetError ());
+		SDL_Quit ();
+		exit (1);
+	}
+	
+	TTF_SetFontStyle (font_normal, TTF_STYLE_ITALIC);
+	
+	otro.r = 0xFF; otro.g = 0xCC; otro.b = 0;
+	texts [TEXT_PLAY_TITLE] = draw_text_with_shadow (font_normal, 2, "PLAY", &otro, &negro);
+	
+	TTF_CloseFont (font_normal);
+	
+	/* Textos de las instrucciones */
+	font_normal = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 20);
+	
+	if (!font_normal) {
+		fprintf (stderr,
+			"Failed to load font file 'CCFaceFront'\n"
+			"The error returned by SDL is:\n"
+			"%s\n", TTF_GetError ());
+		SDL_Quit ();
+		exit (1);
+	}
+	
+	TTF_SetFontStyle (font_normal, TTF_STYLE_ITALIC);
+	
+	texts [TEXT_INSTRUCTIONS] = draw_text_with_shadow (font_normal, 2, "INSTRUCTIONS:", &blanco, &negro);
+	texts [TEXT_SCORING] = draw_text_with_shadow (font_normal, 2, "SCORING:", &blanco, &negro);
+	
+	TTF_CloseFont (font_normal);
+	
+	/* Boton PLAY de 24 puntos en la pantalla de instrucciones */
+	font_normal = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 24);
+	
+	if (!font_normal) {
+		fprintf (stderr,
+			"Failed to load font file 'CCFaceFront'\n"
+			"The error returned by SDL is:\n"
+			"%s\n", TTF_GetError ());
+		SDL_Quit ();
+		exit (1);
+	}
+	
+	TTF_SetFontStyle (font_normal, TTF_STYLE_ITALIC);
+	
+	otro.r = 0xFF; otro.g = 0xCC; otro.b = 0;
+	texts [TEXT_PLAY_2] = draw_text_with_shadow (font_normal, 3, "PLAY", &otro, &negro);
+	texts [TEXT_SCORE] = draw_text_with_shadow (font_normal, 3, "SCORE:", &blanco, &negro);
+	
+	TTF_CloseFont (font_normal);
+	
+	/* TODO: Falta 2 textos */
+	
+	ttf14_normal = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 14);
+	ttf12_normal = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 12);
+	
+	if (!ttf14_normal || !ttf12_normal) {
+		fprintf (stderr,
+			"Failed to load font file 'CCFaceFront'\n"
+			"The error returned by SDL is:\n"
+			"%s\n", TTF_GetError ());
+		SDL_Quit ();
+		exit (1);
+	}
+	
+	TTF_SetFontStyle (ttf14_normal, TTF_STYLE_ITALIC);
+	TTF_SetFontStyle (ttf12_normal, TTF_STYLE_ITALIC);
+	
+	texts [TEXT_CAUGHT] = draw_text_with_shadow (ttf14_normal, 2, "CAUGHT:", &blanco, &negro);
+	texts [TEXT_ESCAPED] = draw_text_with_shadow (ttf14_normal, 2, "ESCAPED:", &blanco, &negro);
+	
+	/* No se cierran las tipografías porque se usan después */
 	
 	srand (SDL_GetTicks ());
 }
