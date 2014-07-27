@@ -39,7 +39,7 @@
 
 /* Prototipos de función */
 SDL_Surface *draw_text (TTF_Font *font, const char *cadena, SDL_Color *color);
-SDL_Surface *draw_text_with_shadow (TTF_Font *font_normal, int outline, char *text, SDL_Color *fill, SDL_Color *shadow);
+SDL_Surface *draw_text_with_shadow (TTF_Font *font_normal, int outline, const char *text, SDL_Color *fill, SDL_Color *shadow);
 
 #endif /* __DRAW_TEXT_H__ */
 

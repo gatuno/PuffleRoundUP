@@ -39,6 +39,10 @@
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 
+#include <locale.h>
+#include "gettext.h"
+#define _(string) gettext (string)
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -299,6 +303,13 @@ TTF_Font *ttf14_outline, *ttf14_normal;
 TTF_Font *ttf12_normal;
 
 int main (int argc, char *argv[]) {
+	
+	/* Inicializar l18n */
+	setlocale (LC_ALL, "");
+	bindtextdomain (PACKAGE, LOCALEDIR);
+
+	textdomain (PACKAGE);
+	
 	setup ();
 	
 	cp_registrar_botones (NUM_BUTTONS);
@@ -778,7 +789,7 @@ int game_score (int segundos, int capturados, int *total_coins) {
 	SDL_BlitSurface (texts[TEXT_SCORE], NULL, screen, &rect);
 	
 	/* Segundos restantes */
-	sprintf (buf, "%i SECONDS LEFT", segundos);
+	sprintf (buf, _("%i SECONDS LEFT"), segundos);
 	text = TTF_RenderUTF8_Blended (ttf14_normal, buf, negro);
 	
 	rect.y = 126;
@@ -801,7 +812,7 @@ int game_score (int segundos, int capturados, int *total_coins) {
 	SDL_FreeSurface (text);
 	
 	/* Puffles capturados */
-	sprintf (buf, "%i PUFFLES CAUGHT =", capturados);
+	sprintf (buf, _("%i PUFFLES CAUGHT ="), capturados);
 	text = TTF_RenderUTF8_Blended (ttf14_normal, buf, negro);
 	
 	rect.y = 159;
@@ -813,7 +824,7 @@ int game_score (int segundos, int capturados, int *total_coins) {
 	SDL_FreeSurface (text);
 	
 	/* Total score */
-	sprintf (buf, "TOTAL SCORE: %i", score);
+	sprintf (buf, _("TOTAL SCORE: %i"), score);
 	text = TTF_RenderUTF8_Blended (ttf12_normal, buf, negro);
 	
 	rect.y = 201;
@@ -825,7 +836,7 @@ int game_score (int segundos, int capturados, int *total_coins) {
 	SDL_FreeSurface (text);
 	
 	/* Monedas en este round */
-	sprintf (buf, "COINS THIS ROUND: %i", coins);
+	sprintf (buf, _("COINS THIS ROUND: %i"), coins);
 	text = TTF_RenderUTF8_Blended (ttf12_normal, buf, negro);
 	
 	rect.y = 220;
@@ -837,7 +848,7 @@ int game_score (int segundos, int capturados, int *total_coins) {
 	SDL_FreeSurface (text);
 	
 	/* Monedas totales */
-	sprintf (buf, "TOTAL COINS: %i", *total_coins);
+	sprintf (buf, _("TOTAL COINS: %i"), *total_coins);
 	text = TTF_RenderUTF8_Blended (ttf14_normal, buf, negro);
 	
 	rect.y = 246;
@@ -946,9 +957,9 @@ void setup (void) {
 	/* Inicializar el Video SDL */
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		fprintf (stderr,
-			"Error: Can't initialize the video subsystem\n"
+			_("Error: Can't initialize the video subsystem\n"
 			"The error returned by SDL is:\n"
-			"%s\n", SDL_GetError());
+			"%s\n"), SDL_GetError());
 		exit (1);
 	}
 	
@@ -957,9 +968,9 @@ void setup (void) {
 	
 	if (screen == NULL) {
 		fprintf (stderr,
-			"Error: Can't setup 760x480 video mode.\n"
+			_("Error: Can't setup 760x480 video mode.\n"
 			"The error returned by SDL is:\n"
-			"%s\n", SDL_GetError());
+			"%s\n"), SDL_GetError());
 		exit (1);
 	}
 	
@@ -968,10 +979,10 @@ void setup (void) {
 		
 		if (image == NULL) {
 			fprintf (stderr,
-				"Failed to load data file:\n"
+				_("Failed to load data file:\n"
 				"%s\n"
 				"The error returned by SDL is:\n"
-				"%s\n", images_names[g], SDL_GetError());
+				"%s\n"), images_names[g], SDL_GetError());
 			SDL_Quit ();
 			exit (1);
 		}
@@ -982,8 +993,8 @@ void setup (void) {
 	
 	if (TTF_Init () < 0) {
 		fprintf (stderr,
-			"Error: Can't initialize the SDL TTF library\n"
-			"%s\n", TTF_GetError ());
+			_("Error: Can't initialize the SDL TTF library\n"
+			"%s\n"), TTF_GetError ());
 		SDL_Quit ();
 		exit (1);
 	}
@@ -993,16 +1004,16 @@ void setup (void) {
 	
 	if (!font_normal) {
 		fprintf (stderr,
-			"Failed to load font file 'CCFaceFront'\n"
+			_("Failed to load font file 'CCFaceFront'\n"
 			"The error returned by SDL is:\n"
-			"%s\n", TTF_GetError ());
+			"%s\n"), TTF_GetError ());
 		SDL_Quit ();
 		exit (1);
 	}
 	
 	TTF_SetFontStyle (font_normal, TTF_STYLE_ITALIC);
 	
-	texts [TEXT_TITLE] = draw_text_with_shadow (font_normal, 3, "PUFFLE ROUNDUP", &blanco, &negro);
+	texts [TEXT_TITLE] = draw_text_with_shadow (font_normal, 3, _("PUFFLE ROUNDUP"), &blanco, &negro);
 	
 	TTF_CloseFont (font_normal);
 	
@@ -1011,9 +1022,9 @@ void setup (void) {
 	
 	if (!font_normal) {
 		fprintf (stderr,
-			"Failed to load font file 'CCFaceFront'\n"
+			_("Failed to load font file 'CCFaceFront'\n"
 			"The error returned by SDL is:\n"
-			"%s\n", TTF_GetError ());
+			"%s\n"), TTF_GetError ());
 		SDL_Quit ();
 		exit (1);
 	}
@@ -1021,7 +1032,7 @@ void setup (void) {
 	TTF_SetFontStyle (font_normal, TTF_STYLE_ITALIC);
 	
 	otro.r = 0xFF; otro.g = 0xCC; otro.b = 0;
-	texts [TEXT_PLAY_TITLE] = draw_text_with_shadow (font_normal, 2, "PLAY", &otro, &negro);
+	texts [TEXT_PLAY_TITLE] = draw_text_with_shadow (font_normal, 2, _("PLAY"), &otro, &negro);
 	
 	TTF_CloseFont (font_normal);
 	
@@ -1030,17 +1041,17 @@ void setup (void) {
 	
 	if (!font_normal) {
 		fprintf (stderr,
-			"Failed to load font file 'CCFaceFront'\n"
+			_("Failed to load font file 'CCFaceFront'\n"
 			"The error returned by SDL is:\n"
-			"%s\n", TTF_GetError ());
+			"%s\n"), TTF_GetError ());
 		SDL_Quit ();
 		exit (1);
 	}
 	
 	TTF_SetFontStyle (font_normal, TTF_STYLE_ITALIC);
 	
-	texts [TEXT_INSTRUCTIONS] = draw_text_with_shadow (font_normal, 2, "INSTRUCTIONS:", &blanco, &negro);
-	texts [TEXT_SCORING] = draw_text_with_shadow (font_normal, 2, "SCORING:", &blanco, &negro);
+	texts [TEXT_INSTRUCTIONS] = draw_text_with_shadow (font_normal, 2, _("INSTRUCTIONS:"), &blanco, &negro);
+	texts [TEXT_SCORING] = draw_text_with_shadow (font_normal, 2, _("SCORING:"), &blanco, &negro);
 	
 	TTF_CloseFont (font_normal);
 	
@@ -1049,9 +1060,9 @@ void setup (void) {
 	
 	if (!font_normal) {
 		fprintf (stderr,
-			"Failed to load font file 'CCFaceFront'\n"
+			_("Failed to load font file 'CCFaceFront'\n"
 			"The error returned by SDL is:\n"
-			"%s\n", TTF_GetError ());
+			"%s\n"), TTF_GetError ());
 		SDL_Quit ();
 		exit (1);
 	}
@@ -1059,8 +1070,8 @@ void setup (void) {
 	TTF_SetFontStyle (font_normal, TTF_STYLE_ITALIC);
 	
 	otro.r = 0xFF; otro.g = 0xCC; otro.b = 0;
-	texts [TEXT_PLAY_2] = draw_text_with_shadow (font_normal, 3, "PLAY", &otro, &negro);
-	texts [TEXT_SCORE] = draw_text_with_shadow (font_normal, 3, "SCORE:", &blanco, &negro);
+	texts [TEXT_PLAY_2] = draw_text_with_shadow (font_normal, 3, _("PLAY"), &otro, &negro);
+	texts [TEXT_SCORE] = draw_text_with_shadow (font_normal, 3, _("SCORE:"), &blanco, &negro);
 	
 	TTF_CloseFont (font_normal);
 	
@@ -1071,9 +1082,9 @@ void setup (void) {
 	
 	if (!ttf14_normal || !ttf12_normal) {
 		fprintf (stderr,
-			"Failed to load font file 'CCFaceFront'\n"
+			_("Failed to load font file 'CCFaceFront'\n"
 			"The error returned by SDL is:\n"
-			"%s\n", TTF_GetError ());
+			"%s\n"), TTF_GetError ());
 		SDL_Quit ();
 		exit (1);
 	}
@@ -1081,8 +1092,8 @@ void setup (void) {
 	TTF_SetFontStyle (ttf14_normal, TTF_STYLE_ITALIC);
 	TTF_SetFontStyle (ttf12_normal, TTF_STYLE_ITALIC);
 	
-	texts [TEXT_CAUGHT] = draw_text_with_shadow (ttf14_normal, 2, "CAUGHT:", &blanco, &negro);
-	texts [TEXT_ESCAPED] = draw_text_with_shadow (ttf14_normal, 2, "ESCAPED:", &blanco, &negro);
+	texts [TEXT_CAUGHT] = draw_text_with_shadow (ttf14_normal, 2, _("CAUGHT:"), &blanco, &negro);
+	texts [TEXT_ESCAPED] = draw_text_with_shadow (ttf14_normal, 2, _("ESCAPED:"), &blanco, &negro);
 	
 	/* No se cierran las tipografías porque se usan después */
 	
