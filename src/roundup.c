@@ -728,7 +728,7 @@ int game_loop (void) {
 		
 		SDL_Flip (screen);
 		
-		if (capturados + escapados == 10 || g < 0) {
+		if (capturados + escapados == 10 || g <= 0) {
 			/* Correr la pantalla de resultados */
 			done = game_score (g, capturados, &monedas);
 			if (done == GAME_CONTINUE) done = GAME_NONE;
@@ -751,14 +751,22 @@ int game_score (int segundos, int capturados, int *total_coins) {
 	int done = 0;
 	SDL_Event event;
 	SDLKey key;
-	SDL_Rect rect;
+	SDL_Rect rect, rect2;
 	Uint32 last_time, now_time;
 	int map;
 	char buf[10];
 	SDL_Surface *text;
 	SDL_Color negro = {0, 0, 0, 0};
-	
+	static Uint32 color;
+	static SDL_Surface *trans = NULL;
 	int score, coins;
+	
+	if (trans == NULL) {
+		color = SDL_MapRGB (screen->format, 255, 255, 255);
+		trans = SDL_CreateRGBSurface (SDL_SWSURFACE | SDL_SRCALPHA, 155, 34, 32, 0, 0, 0, 0);
+		SDL_FillRect (trans, NULL, color); /* Blanco */
+		SDL_SetAlpha (trans, SDL_SRCALPHA, 128); /* Alpha al 50 % */
+	}
 	
 	score = segundos * capturados;
 	coins = score / 10;
@@ -859,6 +867,19 @@ int game_score (int segundos, int capturados, int *total_coins) {
 	
 	SDL_FreeSurface (text);
 	
+	/* El texto de play del botón */
+	rect.w = texts[TEXT_PLAYMORE]->w;
+	rect.x = 235 + (155 - rect.w) / 2;
+	rect.y = 289;
+	rect.h = texts[TEXT_PLAYMORE]->h;
+	SDL_BlitSurface (texts[TEXT_PLAYMORE], NULL, screen, &rect);
+	
+	rect.w = texts[TEXT_FINISH]->w;
+	rect.x = 393 + (131 - rect.w) / 2;
+	rect.y = 289;
+	rect.h = texts[TEXT_FINISH]->h;
+	SDL_BlitSurface (texts[TEXT_FINISH], NULL, screen, &rect);
+	
 	SDL_EventState (SDL_MOUSEMOTION, SDL_ENABLE);
 	
 	do {
@@ -901,17 +922,6 @@ int game_score (int segundos, int capturados, int *total_coins) {
 							break;
 					}
 					break;
-				case SDL_KEYDOWN:
-					if (event.key.keysym.sym == SDLK_ESCAPE) {
-						done = GAME_QUIT;
-					}
-					if (event.key.keysym.sym == SDLK_c) {
-						done = GAME_CONTINUE;
-					}
-					if (event.key.keysym.sym == SDLK_f) {
-						done = GAME_QUIT;
-					}
-				break;
 			}
 		}
 		
@@ -925,6 +935,61 @@ int game_score (int segundos, int capturados, int *total_coins) {
 			
 			SDL_BlitSurface (images[cp_button_frames[BUTTON_CLOSE]], NULL, screen, &rect);
 			cp_button_refresh[BUTTON_CLOSE] = 0;
+		}
+		
+		if (cp_button_refresh[BUTTON_UI_PLAY_MORE]) {
+			/* Borrar el fondo con blanco */
+			rect.x = 235;
+			rect.y = 285;
+			rect.w = 155;
+			rect.h = 34;
+			
+			SDL_FillRect (screen, &rect, color);
+			
+			/* El texto de play del botón */
+			rect.w = texts[TEXT_PLAYMORE]->w;
+			rect.x = 235 + (155 - rect.w) / 2;
+			rect.y = 289;
+			rect.h = texts[TEXT_PLAYMORE]->h;
+			SDL_BlitSurface (texts[TEXT_PLAYMORE], NULL, screen, &rect);
+			
+			if (cp_button_frames[BUTTON_UI_PLAY_MORE] != BLANK_UP) {
+				rect.x = 235;
+				rect.y = 285;
+				rect.w = 155;
+				rect.h = 34;
+				
+				SDL_BlitSurface (trans, NULL, screen, &rect);
+			}
+			cp_button_refresh[BUTTON_UI_PLAY_MORE] = 0;
+		}
+		
+		if (cp_button_refresh[BUTTON_UI_FINISH]) {
+			/* Borrar el fondo con blanco */
+			rect.x = 393;
+			rect.y = 285;
+			rect.w = 131;
+			rect.h = 34;
+			
+			SDL_FillRect (screen, &rect, color);
+			
+			/* El texto de play del botón */
+			rect.w = texts[TEXT_FINISH]->w;
+			rect.x = 393 + (131 - rect.w) / 2;
+			rect.y = 289;
+			rect.h = texts[TEXT_FINISH]->h;
+			SDL_BlitSurface (texts[TEXT_FINISH], NULL, screen, &rect);
+			
+			if (cp_button_frames[BUTTON_UI_FINISH] != BLANK_UP) {
+				rect.x = 393;
+				rect.y = 285;
+				rect2.x = rect2.y = 0;
+				rect.w = rect2.w = 131;
+				rect.h = rect2.h = 34;
+				
+				SDL_BlitSurface (trans, &rect2, screen, &rect);
+			}
+			cp_button_refresh[BUTTON_UI_FINISH] = 0;
 		}
 		
 		SDL_Flip (screen);
@@ -1075,7 +1140,26 @@ void setup (void) {
 	
 	TTF_CloseFont (font_normal);
 	
-	/* TODO: Falta 2 textos */
+	/* Boton PLAY de 16 puntos en la pantalla de instrucciones */
+	font_normal = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 16);
+	
+	if (!font_normal) {
+		fprintf (stderr,
+			_("Failed to load font file 'CCFaceFront'\n"
+			"The error returned by SDL is:\n"
+			"%s\n"), TTF_GetError ());
+		SDL_Quit ();
+		exit (1);
+	}
+	
+	TTF_SetFontStyle (font_normal, TTF_STYLE_ITALIC);
+	
+	otro.r = 0xFF; otro.g = 0xCC; otro.b = 0;
+	texts [TEXT_PLAYMORE] = draw_text_with_shadow (font_normal, 2, _("PLAY MORE"), &otro, &negro);
+	otro.r = 0x66; otro.g = 0xCC; otro.b = 0xFF;
+	texts [TEXT_FINISH] = draw_text_with_shadow (font_normal, 2, _("FINISH"), &otro, &negro);
+	
+	TTF_CloseFont (font_normal);
 	
 	ttf14_normal = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 14);
 	ttf12_normal = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 12);
@@ -1179,6 +1263,8 @@ int map_button_in_game (int x, int y) {
 }
 
 int map_button_in_score (int x, int y) {
+	if (x >= 244 && x < 399 && y >= 285 && y < 319) return BUTTON_UI_PLAY_MORE;
+	if (x >= 393 && x < 524 && y >= 285 && y < 319) return BUTTON_UI_FINISH;
 	if (x >= 720 && x < 749 && y >= 12 && y < 41) return BUTTON_CLOSE;
 	return BUTTON_NONE;
 }
