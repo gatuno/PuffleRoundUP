@@ -236,7 +236,7 @@ enum {
 
 /* La meta información de los puffles */
 const int puffle_data[10][2] = { /* {distancia, velocidad} */
-	{45, 7},   /* Puffle puffles[g] */
+	{45, 7},   /* Puffle Azul */
 	{55, 11},  /* Puffle Rosa */
 	{90, 12},  /* Puffle Verde */
 	{100, 9},  /* Puffle Negro */
@@ -493,7 +493,7 @@ int game_loop (void) {
 	double distancia;
 	int mousex, mousey, dx, dy;
 	double incrementox, incrementoy;
-	int nextx, nexty, g;
+	int nextx, nexty, g, h, i;
 	Uint8 alpha, dummy;
 	Uint32 *pixel;
 	int capturados, escapados;
@@ -503,6 +503,7 @@ int game_loop (void) {
 	SDL_Color blanco = {255, 255, 255, 0}, negro = {0, 0, 0, 0};
 	
 	Puffle puffles[10];
+	Puffle *ordenados[10];
 	
 	acomodar_puffles (puffles);
 	timer = SDL_GetTicks ();
@@ -628,46 +629,57 @@ int game_loop (void) {
 					if (nextx < 80 || nextx > 680 || nexty < 43 || nexty > 443) {
 						puffles[g].escapado = TRUE;
 						escapados++;
-						continue;
 					}
 				/*} else {
 					if (puffles[g].dir - 8 >= 0) puffles[g].dir -= 8;*/
 				}
 				
 				if (puffles[g].capturado) capturados++;
-				
+			} /* Si no está escapado */
+			/* Insertar de forma ordenada */
+			for (h = 0; h < g; h++) {
+				if (ordenados[h]->y > puffles[g].y) break;
+			}
+			for (i = g; i > h; i--) {
+				ordenados[i] = ordenados[i - 1];
+			}
+			ordenados[h] = &puffles[g];
+		} /* Foreach puffles */
+		
+		for (g = 0; g < 10; g++) {
+			if (!ordenados[g]->escapado) {
 				/* Calcular la imagen para dibujar */
-				if (puffles[g].dir == PUFFLE_DIR_3 || puffles[g].dir == PUFFLE_DIR_4 || puffles[g].dir == PUFFLE_DIR_5) {
+				if (ordenados[g]->dir == PUFFLE_DIR_3 || ordenados[g]->dir == PUFFLE_DIR_4 || ordenados[g]->dir == PUFFLE_DIR_5) {
 					//anim = 0;
-					imagen = FACE_3_0 + (puffles[g].dir - PUFFLE_DIR_3);
+					imagen = FACE_3_0 + (ordenados[g]->dir - PUFFLE_DIR_3);
 				} else {
-					if (puffles[g].dir / 8 == 1) {
-						imagen = (puffles[g].dir - PUFFLE_WALK_0) * 12 + puffle_frame_jump[puffles[g].frame];
+					if (ordenados[g]->dir / 8 == 1) {
+						imagen = (ordenados[g]->dir - PUFFLE_WALK_0) * 12 + puffle_frame_jump[ordenados[g]->frame];
 						
-						puffles[g].frame++;
+						ordenados[g]->frame++;
 						/* Secuencia de brinco, si llegamos al final pasar a la otra animación */
-						if (puffle_frame_jump[puffles[g].frame] == -1) {
-							puffles[g].frame = 0;
-							puffles[g].dir = puffles[g].dir - 8;
+						if (puffle_frame_jump[ordenados[g]->frame] == -1) {
+							ordenados[g]->frame = 0;
+							ordenados[g]->dir = ordenados[g]->dir - 8;
 						}
 					} else {
-						imagen = (puffles[g].dir * 4) + puffle_frame_normal[puffles[g].frame];
-						if (puffles[g].dir > PUFFLE_DIR_5) imagen -= 8;
+						imagen = (ordenados[g]->dir * 4) + puffle_frame_normal[ordenados[g]->frame];
+						if (ordenados[g]->dir > PUFFLE_DIR_5) imagen -= 8;
 						
-						puffles[g].frame++;
-						if (puffle_frame_normal[puffles[g].frame] == -1) {
-							puffles[g].frame = 0;
+						ordenados[g]->frame++;
+						if (puffle_frame_normal[ordenados[g]->frame] == -1) {
+							ordenados[g]->frame = 0;
 						}
 					}
 				}
 				
 				/* Redibujar el puffle */
-				rect.x = puffles[g].x - 14;
-				rect.y = puffles[g].y - 22;
+				rect.x = ordenados[g]->x - 14;
+				rect.y = ordenados[g]->y - 22;
 				
-				copy_puffle_tile (puffles[g].color, &rect, imagen);
-			} /* Si no está escapado */
-		} /* Foreach puffles */
+				copy_puffle_tile (ordenados[g]->color, &rect, imagen);
+			}
+		}
 		
 		/* Redibujar el botón de cierre */
 		rect.x = 720;
