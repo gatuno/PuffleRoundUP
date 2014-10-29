@@ -9,6 +9,11 @@ nobase_dist_gamedata_DATA = images/fondo.png \
 	images/puffle-verde.png \
 	images/puffle-negro.png \
 	images/puffle-morado.png \
+	images/puffle-rojo.png \
+	images/puffle-amarillo.png \
+	images/puffle-blanco.png \
+	images/puffle-naranja.png \
+	images/puffle-cafe.png \
 	images/puffle-pen.png \
 	images/wall.png \
 	images/reloj.png \

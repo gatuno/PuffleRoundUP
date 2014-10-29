@@ -99,6 +99,11 @@ enum {
 	IMG_PUFFLE_GREEN,
 	IMG_PUFFLE_BLACK,
 	IMG_PUFFLE_PURPLE,
+	IMG_PUFFLE_RED,
+	IMG_PUFFLE_YELLOW,
+	IMG_PUFFLE_WHITE,
+	IMG_PUFFLE_ORANGE,
+	IMG_PUFFLE_BROWN,
 	
 	IMG_WALL,
 	
@@ -125,6 +130,11 @@ const char *images_names[NUM_IMAGES] = {
 	GAMEDATA_DIR "images/puffle-verde.png",
 	GAMEDATA_DIR "images/puffle-negro.png",
 	GAMEDATA_DIR "images/puffle-morado.png",
+	GAMEDATA_DIR "images/puffle-rojo.png",
+	GAMEDATA_DIR "images/puffle-amarillo.png",
+	GAMEDATA_DIR "images/puffle-blanco.png",
+	GAMEDATA_DIR "images/puffle-naranja.png",
+	GAMEDATA_DIR "images/puffle-cafe.png",
 	
 	GAMEDATA_DIR "images/wall.png",
 	
@@ -174,23 +184,7 @@ enum {
 };
 
 /* Pseudo animación para el puffle */
-const int puffle_frame_normal [55] = {
-	/* Cuando el puffle mira al Frente */
-	FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0,
-	FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0,
-	FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0,
-	FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0,
-	FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0, FACE_0_0,
-	FACE_0_1, FACE_0_1,
-	FACE_0_2, FACE_0_2, FACE_0_2, FACE_0_2,
-	FACE_0_3, FACE_0_3,
-	-1 /* Fin de la animación */
-};
-
-const int puffle_frame_jump [13] = {
-	FACE_J0_0, FACE_J0_1, FACE_J0_2, FACE_J0_3, FACE_J0_4, FACE_J0_5, FACE_J0_6, FACE_J0_7, FACE_J0_8, FACE_J0_9, FACE_J0_10, FACE_J0_11,
-	-1
-};
+int puffle_frame_normal [10][65];
 
 /* Para el motor de botones */
 enum {
@@ -303,7 +297,6 @@ TTF_Font *ttf14_outline, *ttf14_normal;
 TTF_Font *ttf12_normal;
 
 int main (int argc, char *argv[]) {
-	
 	/* Inicializar l18n */
 	setlocale (LC_ALL, "");
 	bindtextdomain (PACKAGE, LOCALEDIR);
@@ -598,7 +591,11 @@ int game_loop (void) {
 					nexty = puffles[g].y - incrementoy;
 					
 					if (puffles[g].dir / 8 == 0) puffles[g].frame = 0;
-					puffles[g].dir = encontrar_angulo_y_dir (mousex, mousey, puffles[g].x, puffles[g].y) + 8;
+					if (puffles[g].color < 8) {
+						puffles[g].dir = encontrar_angulo_y_dir (mousex, mousey, puffles[g].x, puffles[g].y) + 8;
+					} else {
+						puffles[g].dir = encontrar_angulo_y_dir (mousex, mousey, puffles[g].x, puffles[g].y);
+					}
 					
 					/* Colisión contra el muro */
 					if (nextx >= WALL_X && nextx < WALL_X + images[IMG_WALL]->w && nexty >= WALL_Y && nexty < WALL_Y + images[IMG_WALL]->h) {
@@ -654,20 +651,23 @@ int game_loop (void) {
 					imagen = FACE_3_0 + (ordenados[g]->dir - PUFFLE_DIR_3);
 				} else {
 					if (ordenados[g]->dir / 8 == 1) {
-						imagen = (ordenados[g]->dir - PUFFLE_WALK_0) * 12 + puffle_frame_jump[ordenados[g]->frame];
+						imagen = (ordenados[g]->dir - PUFFLE_WALK_0) * 12 + FACE_J0_0 + ordenados[g]->frame;
 						
 						ordenados[g]->frame++;
 						/* Secuencia de brinco, si llegamos al final pasar a la otra animación */
-						if (puffle_frame_jump[ordenados[g]->frame] == -1) {
+						if (ordenados[g]->color < 3 && ordenados[g]->frame == 12) {
+							ordenados[g]->frame = 0;
+							ordenados[g]->dir = ordenados[g]->dir - 8;
+						} else if (ordenados[g]->color > 2 && ordenados[g]->frame == 8) {
 							ordenados[g]->frame = 0;
 							ordenados[g]->dir = ordenados[g]->dir - 8;
 						}
 					} else {
-						imagen = (ordenados[g]->dir * 4) + puffle_frame_normal[ordenados[g]->frame];
+						imagen = (ordenados[g]->dir * 4) + puffle_frame_normal[ordenados[g]->color][ordenados[g]->frame];
 						if (ordenados[g]->dir > PUFFLE_DIR_5) imagen -= 8;
 						
 						ordenados[g]->frame++;
-						if (puffle_frame_normal[ordenados[g]->frame] == -1) {
+						if (puffle_frame_normal[ordenados[g]->color][ordenados[g]->frame] == -1) {
 							ordenados[g]->frame = 0;
 						}
 					}
@@ -677,7 +677,7 @@ int game_loop (void) {
 				rect.x = ordenados[g]->x - 14;
 				rect.y = ordenados[g]->y - 22;
 				
-				copy_puffle_tile (ordenados[g]->color, &rect, imagen);
+				copy_puffle_tile (IMG_PUFFLE_BLUE + ordenados[g]->color, &rect, imagen);
 			}
 		}
 		
@@ -821,7 +821,7 @@ int game_score (int segundos, int capturados, int *total_coins) {
 	SDL_FreeSurface (text);
 	
 	/* La "x" */
-	text = TTF_RenderUTF8_Blended (ttf12_normal, buf, negro);
+	text = TTF_RenderUTF8_Blended (ttf12_normal, "X", negro);
 	
 	rect.y = 142;
 	rect.x = 232 + (295 - text->w) / 2;
@@ -1193,6 +1193,56 @@ void setup (void) {
 	
 	/* No se cierran las tipografías porque se usan después */
 	
+	/* Parte de la inicialización es inicializar el arreglo de animación */
+	for (g = 0; g < 46; g++) {
+		puffle_frame_normal[0][g] = puffle_frame_normal[1][g] = puffle_frame_normal[2][g] = FACE_0_0;
+	}
+	
+	for (g = 0; g < 53; g++) {
+		puffle_frame_normal[3][g] = FACE_0_0;
+	}
+	
+	for (g = 0; g < 41; g++) {
+		puffle_frame_normal[4][g] = FACE_0_0;
+	}
+	
+	for (g = 0; g < 56; g++) {
+		puffle_frame_normal[5][g] = FACE_0_0;
+	}
+	
+	for (g = 0; g < 51; g++) {
+		puffle_frame_normal[6][g] = puffle_frame_normal[7][g] = puffle_frame_normal[8][g] = puffle_frame_normal[9][g] = FACE_0_0;
+	}
+	
+	for (g = 0; g < 3; g++) {
+		puffle_frame_normal[g][46] = puffle_frame_normal[g][47] = FACE_0_1;
+		puffle_frame_normal[g][48] = puffle_frame_normal[g][49] = puffle_frame_normal[g][50] = puffle_frame_normal[g][51] = FACE_0_2;
+		puffle_frame_normal[g][52] = puffle_frame_normal[g][53] = FACE_0_3;
+		puffle_frame_normal[g][54] = -1;
+	}
+	
+	puffle_frame_normal[3][53] = puffle_frame_normal[3][54] = FACE_0_1;
+	puffle_frame_normal[3][55] = puffle_frame_normal[3][56] = puffle_frame_normal[3][57] = puffle_frame_normal[3][58] = FACE_0_2;
+	puffle_frame_normal[3][59] = puffle_frame_normal[3][60] = FACE_0_3;
+	puffle_frame_normal[3][61] = -1;
+	
+	puffle_frame_normal[4][41] = puffle_frame_normal[4][42] = FACE_0_1;
+	puffle_frame_normal[4][43] = puffle_frame_normal[4][44] = puffle_frame_normal[4][45] = puffle_frame_normal[4][46] = FACE_0_2;
+	puffle_frame_normal[4][47] = puffle_frame_normal[4][48] = FACE_0_3;
+	puffle_frame_normal[4][49] = -1;
+	
+	puffle_frame_normal[5][56] = puffle_frame_normal[5][57] = FACE_0_1;
+	puffle_frame_normal[5][58] = puffle_frame_normal[5][59] = puffle_frame_normal[5][60] = puffle_frame_normal[5][61] = FACE_0_2;
+	puffle_frame_normal[5][62] = puffle_frame_normal[5][63] = FACE_0_3;
+	puffle_frame_normal[5][64] = -1;
+	
+	for (g = 6; g < 10; g++) {
+		puffle_frame_normal[g][51] = puffle_frame_normal[g][52] = FACE_0_1;
+		puffle_frame_normal[g][53] = puffle_frame_normal[g][54] = puffle_frame_normal[g][55] = puffle_frame_normal[g][56] = FACE_0_2;
+		puffle_frame_normal[g][57] = puffle_frame_normal[g][58] = FACE_0_3;
+		puffle_frame_normal[g][59] = -1;
+	}
+	
 	srand (SDL_GetTicks ());
 }
 
@@ -1232,7 +1282,7 @@ inline double encontrar_distancia (int dx, int dy) {
 
 void acomodar_puffles (Puffle *puffles) {
 	int g, r;
-	int paquete[10] = {0, 0, 1, 1, 2, 2, 0, 1, 2, 0};
+	int paquete[10];
 	int sel_mapa;
 	const int (*local_mapa)[2];
 	
@@ -1241,7 +1291,7 @@ void acomodar_puffles (Puffle *puffles) {
 	local_mapa = map[sel_mapa];
 	
 	/* TODO: Seleccionar un paquete de colores */
-	//memcpy (paquete, colores[r], sizeof (paquete));
+	memcpy (paquete, colores[r], sizeof (paquete));
 	
 	for (g = 0; g < 20; g++) {
 		r = RANDOM (9) + 1;
@@ -1252,7 +1302,7 @@ void acomodar_puffles (Puffle *puffles) {
 	}
 	
 	for (g = 0; g < 10; g++) {
-		puffles[g].color = IMG_PUFFLE_BLUE + paquete [g];
+		puffles[g].color = paquete [g];
 		puffles[g].capturado = puffles[g].escapado = FALSE;
 		puffles[g].frame = 0;
 		puffles[g].dir = PUFFLE_DIR_0;
