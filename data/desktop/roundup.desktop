@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=false
+Name=Puffle Round-Up
+Icon=roundup
+Comment=Catch the puffles inside the pen
+Exec=puffle-roundup
+Categories=Game;

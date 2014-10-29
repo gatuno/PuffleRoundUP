@@ -1,4 +1,4 @@
-AC_INIT([Puffle Round UP], [0.1], [], [puffle-roundup])
+AC_INIT([Puffle Round UP], [0.9.2], [], [puffle-roundup])
 
 AC_REVISION([Revision 1])
 

@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: puffle-roundup 0.1\n"
+"Project-Id-Version: puffle-roundup 0.9.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-08-30 19:06-0500\n"
+"POT-Creation-Date: 2014-10-28 21:22-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,32 +17,32 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/roundup.c:800
+#: src/roundup.c:812
 #, c-format
 msgid "%i SECONDS LEFT"
 msgstr ""
 
-#: src/roundup.c:823
+#: src/roundup.c:835
 #, c-format
 msgid "%i PUFFLES CAUGHT ="
 msgstr ""
 
-#: src/roundup.c:835
+#: src/roundup.c:847
 #, c-format
 msgid "TOTAL SCORE: %i"
 msgstr ""
 
-#: src/roundup.c:847
+#: src/roundup.c:859
 #, c-format
 msgid "COINS THIS ROUND: %i"
 msgstr ""
 
-#: src/roundup.c:859
+#: src/roundup.c:871
 #, c-format
 msgid "TOTAL COINS: %i"
 msgstr ""
 
-#: src/roundup.c:1025
+#: src/roundup.c:1037
 #, c-format
 msgid ""
 "Error: Can't initialize the video subsystem\n"
@@ -50,7 +50,7 @@ msgid ""
 "%s\n"
 msgstr ""
 
-#: src/roundup.c:1036
+#: src/roundup.c:1056
 #, c-format
 msgid ""
 "Error: Can't setup 760x480 video mode.\n"
@@ -58,7 +58,7 @@ msgid ""
 "%s\n"
 msgstr ""
 
-#: src/roundup.c:1047
+#: src/roundup.c:1067
 #, c-format
 msgid ""
 "Failed to load data file:\n"
@@ -67,15 +67,15 @@ msgid ""
 "%s\n"
 msgstr ""
 
-#: src/roundup.c:1061
+#: src/roundup.c:1081
 #, c-format
 msgid ""
 "Error: Can't initialize the SDL TTF library\n"
 "%s\n"
 msgstr ""
 
-#: src/roundup.c:1072 src/roundup.c:1090 src/roundup.c:1109 src/roundup.c:1128
-#: src/roundup.c:1148 src/roundup.c:1169
+#: src/roundup.c:1092 src/roundup.c:1110 src/roundup.c:1129 src/roundup.c:1148
+#: src/roundup.c:1168 src/roundup.c:1189
 #, c-format
 msgid ""
 "Failed to load font file 'CCFaceFront'\n"
@@ -83,38 +83,38 @@ msgid ""
 "%s\n"
 msgstr ""
 
-#: src/roundup.c:1081
+#: src/roundup.c:1101
 msgid "PUFFLE ROUNDUP"
 msgstr ""
 
-#: src/roundup.c:1100 src/roundup.c:1138
+#: src/roundup.c:1120 src/roundup.c:1158
 msgid "PLAY"
 msgstr ""
 
-#: src/roundup.c:1118
+#: src/roundup.c:1138
 msgid "INSTRUCTIONS:"
 msgstr ""
 
-#: src/roundup.c:1119
+#: src/roundup.c:1139
 msgid "SCORING:"
 msgstr ""
 
-#: src/roundup.c:1139
+#: src/roundup.c:1159
 msgid "SCORE:"
 msgstr ""
 
-#: src/roundup.c:1158
+#: src/roundup.c:1178
 msgid "PLAY MORE"
 msgstr ""
 
-#: src/roundup.c:1160
+#: src/roundup.c:1180
 msgid "FINISH"
 msgstr ""
 
-#: src/roundup.c:1179
+#: src/roundup.c:1199
 msgid "CAUGHT:"
 msgstr ""
 
-#: src/roundup.c:1180
+#: src/roundup.c:1200
 msgid "ESCAPED:"
 msgstr ""
