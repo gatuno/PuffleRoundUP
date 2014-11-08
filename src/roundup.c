@@ -37,6 +37,7 @@
 
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_mixer.h>
 #include <SDL_ttf.h>
 
 #include <locale.h>
@@ -140,6 +141,25 @@ const char *images_names[NUM_IMAGES] = {
 	
 	GAMEDATA_DIR "images/reloj.png"
 };
+
+enum {
+	SND_CAPTURE_1,
+	SND_CAPTURE_2,
+	
+	SND_ESCAPE,
+	
+	NUM_SOUNDS
+};
+
+const char *sound_names[NUM_SOUNDS] = {
+	GAMEDATA_DIR "sounds/capture1.wav",
+	GAMEDATA_DIR "sounds/capture2.wav",
+	
+	GAMEDATA_DIR "sounds/escape.wav",
+};
+
+#define MUS_ROUNDUP_1 GAMEDATA_DIR "music/roundup1.ogg"
+#define MUS_ROUNDUP_2 GAMEDATA_DIR "music/roundup2.ogg"
 
 /* Enumerar las caras de los Puffles */
 enum {
@@ -293,6 +313,10 @@ SDL_Surface * screen;
 SDL_Surface * images [NUM_IMAGES];
 SDL_Surface *texts [NUM_TEXTS];
 
+int use_sound;
+Mix_Chunk * sounds[NUM_SOUNDS];
+Mix_Music * music[2];
+
 TTF_Font *ttf14_outline, *ttf14_normal;
 TTF_Font *ttf12_normal;
 
@@ -383,8 +407,16 @@ int game_intro (void) {
 	rect.h = texts[TEXT_PLAY_TITLE]->h;
 	SDL_BlitSurface (texts[TEXT_PLAY_TITLE], NULL, screen, &rect);
 	
+	Mix_VolumeMusic (MIX_MAX_VOLUME / 5); /* 20% */
+	Mix_PlayMusic (music[0], 1);
+	
 	do {
 		last_time = SDL_GetTicks ();
+		
+		if (!Mix_PlayingMusic ()) {
+			map = RANDOM (2);
+			Mix_PlayMusic (music[map], 1);
+		}
 		
 		while (SDL_PollEvent(&event) > 0) {
 			/* fprintf (stdout, "Evento: %i\n", event.type);*/
@@ -508,6 +540,11 @@ int game_loop (void) {
 	do {
 		last_time = SDL_GetTicks ();
 		
+		if (!Mix_PlayingMusic ()) {
+			map = RANDOM (2);
+			Mix_PlayMusic (music[map], 1);
+		}
+		
 		while (SDL_PollEvent(&event) > 0) {
 			switch (event.type) {
 				case SDL_QUIT:
@@ -613,7 +650,8 @@ int game_loop (void) {
 					if (nextx >= PEN_X && nextx < PEN_X + PEN_W && nexty >= PEN_Y && nexty < PEN_Y + PEN_H) {
 						if (!puffles[g].capturado) {
 							puffles[g].capturado = TRUE;
-							/* TODO: Reproducir sonido de capturado */
+							imagen = RANDOM (2);
+							if (use_sound) Mix_PlayChannel (-1, sounds[SND_CAPTURE_1 + imagen], 0);
 						}
 					} else {
 						puffles[g].capturado = FALSE;
@@ -626,6 +664,7 @@ int game_loop (void) {
 					if (nextx < 80 || nextx > 680 || nexty < 43 || nexty > 443) {
 						puffles[g].escapado = TRUE;
 						escapados++;
+						if (use_sound) Mix_PlayChannel (-1, sounds[SND_ESCAPE], 0);
 					}
 				/*} else {
 					if (puffles[g].dir - 8 >= 0) puffles[g].dir -= 8;*/
@@ -897,6 +936,11 @@ int game_score (int segundos, int capturados, int *total_coins) {
 	do {
 		last_time = SDL_GetTicks ();
 		
+		if (!Mix_PlayingMusic ()) {
+			map = RANDOM (2);
+			Mix_PlayMusic (music[map], 1);
+		}
+		
 		while (SDL_PollEvent(&event) > 0) {
 			switch (event.type) {
 				case SDL_QUIT:
@@ -1046,6 +1090,7 @@ void setup (void) {
 		SDL_WM_SetIcon (image, NULL);
 		SDL_FreeSurface (image);
 	}
+	
 	SDL_WM_SetCaption ("Puffle Round UP", "Puffle Round UP");
 	
 	/* Crear la pantalla de dibujado */
@@ -1057,6 +1102,25 @@ void setup (void) {
 			"The error returned by SDL is:\n"
 			"%s\n"), SDL_GetError());
 		exit (1);
+	}
+	
+	use_sound = 1;
+	if (SDL_InitSubSystem (SDL_INIT_AUDIO) < 0) {
+		fprintf (stdout,
+			"Warning: Can't initialize the audio subsystem\n"
+			"Continuing...\n");
+		use_sound = 0;
+	}
+	
+	if (use_sound) {
+		/* Inicializar el sonido */
+		if (Mix_OpenAudio (22050, AUDIO_S16, 2, 4096) < 0) {
+			fprintf (stdout,
+				"Warning: Can't initialize the SDL Mixer library\n");
+			use_sound = 0;
+		} else {
+			Mix_AllocateChannels (3);
+		}
 	}
 	
 	for (g = 0; g < NUM_IMAGES; g++) {
@@ -1074,6 +1138,36 @@ void setup (void) {
 		
 		images[g] = image;
 		/* TODO: Mostrar la carga de porcentaje */
+	}
+	
+	if (use_sound) {
+		for (g = 0; g < NUM_SOUNDS; g++) {
+			sounds[g] = Mix_LoadWAV (sound_names [g]);
+			
+			if (sounds[g] == NULL) {
+				fprintf (stderr,
+					_("Failed to load data file:\n"
+					"%s\n"
+					"The error returned by SDL is:\n"
+					"%s\n"), sound_names [g], SDL_GetError ());
+				SDL_Quit ();
+				exit (1);
+			}
+			Mix_VolumeChunk (sounds[g], MIX_MAX_VOLUME / 2);
+		}
+		
+		/* Cargar las músicas de fondo */
+		music[0] = Mix_LoadMUS (MUS_ROUNDUP_1);
+		music[1] = Mix_LoadMUS (MUS_ROUNDUP_2);
+		
+		if (music[0] == NULL || music[1] == NULL) {
+			fprintf (stderr,
+				_("Failed to load a music file.\n"
+				"The error returned by SDL is:\n"
+				"%s\n"), SDL_GetError ());
+			SDL_Quit ();
+			exit (1);
+		}
 	}
 	
 	if (TTF_Init () < 0) {
