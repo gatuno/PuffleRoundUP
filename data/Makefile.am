@@ -58,11 +58,12 @@ install-data-hook:
 	touch $(DESTDIR)$(datadir)/icons/hicolor
 
 EXTRA_DIST = \
-	desktop/roundup.desktop	\
-	desktop/16x16/roundup.png		\
-	desktop/24x24/roundup.png		\
-	desktop/32x32/roundup.png		\
-	desktop/48x48/roundup.png		\
-	desktop/64x64/roundup.png		\
-	desktop/128x128/roundup.png		\
-	desktop/256x256/roundup.png
+	desktop/roundup.desktop \
+	desktop/16x16/roundup.png \
+	desktop/24x24/roundup.png \
+	desktop/32x32/roundup.png \
+	desktop/48x48/roundup.png \
+	desktop/64x64/roundup.png \
+	desktop/128x128/roundup.png	\
+	desktop/256x256/roundup.png \
+	roundup.ico

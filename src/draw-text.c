@@ -28,7 +28,12 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 
+#include "config.h"
 #include "draw-text.h"
+
+#ifdef __MINGW32__
+#	include "strsep.h"
+#endif
 
 SDL_Surface *draw_text (TTF_Font *font, const char *cadena, SDL_Color *color) {
 	SDL_Surface *final, **text;
@@ -36,7 +41,7 @@ SDL_Surface *draw_text (TTF_Font *font, const char *cadena, SDL_Color *color) {
 	int n_tokens;
 	int g, len, maxw;
 	Uint32 pixel;
-	char *dup, *str_token;
+	char *dup, *str_token, *original;
 	
 	/* Si contiene saltos de linea, llamar a la otra función */
 	if (strchr (cadena, '\n') != NULL) {
@@ -47,7 +52,7 @@ SDL_Surface *draw_text (TTF_Font *font, const char *cadena, SDL_Color *color) {
 		len =  TTF_FontLineSkip (font) * n_tokens;
 		
 		text = (SDL_Surface **) malloc (sizeof (SDL_Surface *) * n_tokens);
-		dup = strdupa (cadena);
+		original = dup = strdup (cadena);
 		
 		str_token = strsep (&dup, "\n");
 		g = 0; maxw = 0;
@@ -79,6 +84,7 @@ SDL_Surface *draw_text (TTF_Font *font, const char *cadena, SDL_Color *color) {
 		}
 		SDL_SetAlpha(final, SDL_SRCALPHA, SDL_ALPHA_OPAQUE);
 		free (text);
+		free (original);
 		return final;	
 	} else {
 		/* En caso contrario, renderizarla nosotros mismos */
