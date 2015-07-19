@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: puffle-roundup 0.9.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-11-08 14:11-0600\n"
+"POT-Creation-Date: 2015-07-18 21:09-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,32 +17,32 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/roundup.c:851
+#: src/roundup.c:1165
 #, c-format
 msgid "%i SECONDS LEFT"
 msgstr ""
 
-#: src/roundup.c:874
+#: src/roundup.c:1188
 #, c-format
 msgid "%i PUFFLES CAUGHT ="
 msgstr ""
 
-#: src/roundup.c:886
+#: src/roundup.c:1200
 #, c-format
 msgid "TOTAL SCORE: %i"
 msgstr ""
 
-#: src/roundup.c:898
+#: src/roundup.c:1212
 #, c-format
 msgid "COINS THIS ROUND: %i"
 msgstr ""
 
-#: src/roundup.c:910
+#: src/roundup.c:1224
 #, c-format
 msgid "TOTAL COINS: %i"
 msgstr ""
 
-#: src/roundup.c:1081
+#: src/roundup.c:1395
 #, c-format
 msgid ""
 "Error: Can't initialize the video subsystem\n"
@@ -50,7 +50,7 @@ msgid ""
 "%s\n"
 msgstr ""
 
-#: src/roundup.c:1101
+#: src/roundup.c:1415
 #, c-format
 msgid ""
 "Error: Can't setup 760x480 video mode.\n"
@@ -58,7 +58,7 @@ msgid ""
 "%s\n"
 msgstr ""
 
-#: src/roundup.c:1131 src/roundup.c:1149
+#: src/roundup.c:1445 src/roundup.c:1463
 #, c-format
 msgid ""
 "Failed to load data file:\n"
@@ -67,7 +67,7 @@ msgid ""
 "%s\n"
 msgstr ""
 
-#: src/roundup.c:1165
+#: src/roundup.c:1479
 #, c-format
 msgid ""
 "Failed to load a music file.\n"
@@ -75,15 +75,15 @@ msgid ""
 "%s\n"
 msgstr ""
 
-#: src/roundup.c:1175
+#: src/roundup.c:1489
 #, c-format
 msgid ""
 "Error: Can't initialize the SDL TTF library\n"
 "%s\n"
 msgstr ""
 
-#: src/roundup.c:1186 src/roundup.c:1204 src/roundup.c:1223 src/roundup.c:1242
-#: src/roundup.c:1262 src/roundup.c:1283
+#: src/roundup.c:1500 src/roundup.c:1518 src/roundup.c:1537 src/roundup.c:1556
+#: src/roundup.c:1576 src/roundup.c:1597
 #, c-format
 msgid ""
 "Failed to load font file 'CCFaceFront'\n"
@@ -91,38 +91,60 @@ msgid ""
 "%s\n"
 msgstr ""
 
-#: src/roundup.c:1195
+#: src/roundup.c:1509
 msgid "PUFFLE ROUNDUP"
 msgstr ""
 
-#: src/roundup.c:1214 src/roundup.c:1252
+#: src/roundup.c:1528 src/roundup.c:1566
 msgid "PLAY"
 msgstr ""
 
-#: src/roundup.c:1232
+#: src/roundup.c:1546
 msgid "INSTRUCTIONS:"
 msgstr ""
 
-#: src/roundup.c:1233
+#: src/roundup.c:1547
 msgid "SCORING:"
 msgstr ""
 
-#: src/roundup.c:1253
+#: src/roundup.c:1567
 msgid "SCORE:"
 msgstr ""
 
-#: src/roundup.c:1272
+#: src/roundup.c:1586
 msgid "PLAY MORE"
 msgstr ""
 
-#: src/roundup.c:1274
+#: src/roundup.c:1588
 msgid "FINISH"
 msgstr ""
 
-#: src/roundup.c:1293
+#: src/roundup.c:1607
 msgid "CAUGHT:"
 msgstr ""
 
-#: src/roundup.c:1294
+#: src/roundup.c:1608
 msgid "ESCAPED:"
+msgstr ""
+
+#: src/roundup.c:1616
+#, c-format
+msgid ""
+"Failed to load font file 'BurbankSB'\n"
+"The error returned by SDL is:\n"
+"%s\n"
+msgstr ""
+
+#: src/roundup.c:1623
+msgid ""
+"Move your mouse around, \"herding\" as many\n"
+"puffles as you can into the brown pen."
+msgstr ""
+
+#: src/roundup.c:1625
+msgid ""
+"Your score will be based on\n"
+"the number of puffles you can\n"
+"catch within the shortest\n"
+"amount of time."
 msgstr ""

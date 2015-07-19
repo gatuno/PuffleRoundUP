@@ -20,13 +20,16 @@ nobase_dist_gamedata_DATA = images/fondo.png \
 	images/boton-close-over.png \
 	images/boton-close-up.png \
 	images/boton-close-down.png \
+	images/pointer.png \
+	images/puffle-intro-anim.png \
 	images/icon.png \
 	sounds/capture1.wav \
 	sounds/capture2.wav \
 	sounds/escape.wav \
 	music/roundup1.ogg \
 	music/roundup2.ogg \
-	ccfacefront.ttf
+	ccfacefront.ttf \
+	burbanksb.ttf
 
 # Instalar los archivos .desktop e iconos
 applicationsdir = $(datadir)/applications

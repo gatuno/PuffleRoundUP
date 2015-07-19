@@ -110,6 +110,9 @@ enum {
 	
 	IMG_CLOCK,
 	
+	IMG_POINTER,
+	IMG_PUFFLE_ANIM,
+	
 	NUM_IMAGES
 };
 
@@ -143,8 +146,10 @@ const char *images_names[NUM_IMAGES] = {
 	GAMEDATA_DIR "images/puffle-cafe.png",
 	
 	GAMEDATA_DIR "images/wall.png",
+	GAMEDATA_DIR "images/reloj.png",
 	
-	GAMEDATA_DIR "images/reloj.png"
+	GAMEDATA_DIR "images/pointer.png",
+	GAMEDATA_DIR "images/puffle-intro-anim.png"
 };
 
 enum {
@@ -287,6 +292,18 @@ const int colores[5][10] = {
 	{0, 0, 9, 1, 8, 2, 3, 3, 4, 6}
 };
 
+const float pointer_pos[66][2] = {
+	{37.25, 27.3}, {32.3, 25.05}, {27.4, 22.85}, {22.5, 20.6}, {17.6, 18.4}, {12.65, 16.2}, {7.75, 13.95}, {2.85, 11.75},
+	{-2.1, 9.5}, {-7, 7.3}, {-10.7, 3.35}, {-11.75, -2.05}, {-7.9, -6.7}, {-2.9, -8.15}, {2.1, -9.6},
+	{7.1, -11.05}, {12.1, -12.5}, {16.75, -12}, {16.75, -12}, {16.75, -12}, {16.75, -12}, {16.75, -12},
+	{16.75, -12}, {16.75, -12}, {16.75, -12}, {22, -6.65}, {27.25, -1.3}, {32.55, 4.05}, {37.8, 9.35},
+	{43.05, 14.7}, {48.3, 20.05}, {53.25, 26.55}, {58.55, 32.3}, {67.3, 32.95}, {74.2, 27.8}, {81.1, 22.65},
+	{88, 17.5}, {90.45, 10.65}, {90.4, 4}, {88.05, -2.75}, {83.4, -8.4}, {76.65, -12.8}, {72.5, -14.35}, {68.35, -15.95},
+	{64.2, -17.5}, {59.75, -18.25}, {59.75, -18.25}, {59.75, -18.25}, {59.75, -18.25}, {59.75, -18.25}, {59.75, -18.25},
+	{59.75, -18.25}, {59.75, -18.25}, {59.75, -18.25}, {59.75, -18.25}, {58.85, -14.9}, {60.35, -8.95}, {61.85, -3},
+	{63.1, 3.15}, {63.9, 9.55}, {63.55, 15.95}, {59.3, 21.95}, {55.05, 27.9}, {48.8, 29.3}, {42.15, 29.5}, {42.15, 29.5}
+};
+
 /* Estructuras */
 typedef struct {
 	int capturado;
@@ -301,6 +318,7 @@ typedef struct {
 
 /* Prototipos de función */
 int game_intro (void);
+int game_explain (void);
 int game_loop (void);
 int game_score (int segundos, int capturados, int *total_coins);
 void setup (void);
@@ -311,6 +329,7 @@ int encontrar_angulo_y_dir (int x1, int y1, int x2, int y2);
 void acomodar_puffles (Puffle *puffles);
 inline int map_button_in_opening (int x, int y);
 inline int map_button_in_game (int x, int y);
+inline int map_button_in_explain (int x, int y);
 inline int map_button_in_score (int x, int y);
 
 /* Variables globales */
@@ -322,7 +341,7 @@ int use_sound;
 Mix_Chunk * sounds[NUM_SOUNDS];
 Mix_Music * music[2];
 
-TTF_Font *ttf14_outline, *ttf14_normal;
+TTF_Font *ttf14_normal;
 TTF_Font *ttf12_normal;
 
 int main (int argc, char *argv[]) {
@@ -343,6 +362,7 @@ int main (int argc, char *argv[]) {
 	
 	do {
 		if (game_intro () == GAME_QUIT) break;
+		if (game_explain () == GAME_QUIT) break;
 		if (game_loop () == GAME_QUIT) break;
 	} while (1 == 0);
 	
@@ -355,6 +375,8 @@ int game_intro (void) {
 	SDL_Event event;
 	SDLKey key;
 	SDL_Rect rect;
+	SDL_Rect update_rects[6];
+	int num_rects;
 	Uint32 last_time, now_time;
 	int map;
 	Uint32 color;
@@ -415,8 +437,12 @@ int game_intro (void) {
 	Mix_VolumeMusic (MIX_MAX_VOLUME / 5); /* 20% */
 	Mix_PlayMusic (music[0], 1);
 	
+	SDL_Flip (screen);
+	
 	do {
 		last_time = SDL_GetTicks ();
+		
+		num_rects = 0;
 		
 		if (!Mix_PlayingMusic ()) {
 			map = RANDOM (2);
@@ -475,6 +501,7 @@ int game_intro (void) {
 			
 			SDL_BlitSurface (images[cp_button_frames[BUTTON_CLOSE]], NULL, screen, &rect);
 			cp_button_refresh[BUTTON_CLOSE] = 0;
+			update_rects[num_rects++] = rect;
 		}
 		
 		if (cp_button_refresh[BUTTON_UI_START]) {
@@ -485,6 +512,7 @@ int game_intro (void) {
 			rect.h = 37;
 			
 			SDL_FillRect (screen, &rect, color);
+			update_rects[num_rects++] = rect;
 			
 			/* El texto de play del botón */
 			rect.w = texts[TEXT_PLAY_TITLE]->w;
@@ -502,7 +530,288 @@ int game_intro (void) {
 				SDL_BlitSurface (trans, NULL, screen, &rect);
 			}
 		}
-		SDL_Flip (screen);
+		
+		SDL_UpdateRects (screen, num_rects, update_rects);
+		num_rects = 0;
+		
+		now_time = SDL_GetTicks ();
+		if (now_time < last_time + FPS) SDL_Delay(last_time + FPS - now_time);
+	} while (!done);
+	
+	SDL_FreeSurface (trans);
+	return done;
+}
+
+int game_explain (void) {
+	int done = 0;
+	SDL_Event event;
+	Uint32 last_time, now_time;
+	SDL_Rect rect, rect2;
+	SDL_Rect update_rects[6];
+	int num_rects;
+	int map;
+	
+	int frame = 0;
+	int minx, miny, maxx, maxy;
+	
+	Uint32 color;
+	SDL_Surface *trans;
+	
+	color = SDL_MapRGB (screen->format, 255, 255, 255);
+	trans = SDL_CreateRGBSurface (SDL_SWSURFACE | SDL_SRCALPHA, 106, 37, 32, 0, 0, 0, 0);
+	SDL_FillRect (trans, NULL, color); /* Blanco */
+	SDL_SetAlpha (trans, SDL_SRCALPHA, 128); /* Alpha al 50 % */
+	
+	SDL_BlitSurface (images[IMG_FONDO], NULL, screen, NULL);
+	
+	/* Copiar la pantalla de introducción */
+	rect.x = 204;
+	rect.y = 57;
+	rect.w = images[IMG_INTRO]->w;
+	rect.h = images[IMG_INTRO]->h;
+	
+	SDL_BlitSurface (images[IMG_INTRO], NULL, screen, &rect);
+	
+	/* Copiar el texto de instrucciones centrado */
+	rect.x = 232 + (296 - texts[TEXT_INSTRUCTIONS]->w) / 2;
+	rect.y = 92;
+	rect.w = texts[TEXT_INSTRUCTIONS]->w;
+	rect.h = texts[TEXT_INSTRUCTIONS]->h;
+	
+	SDL_BlitSurface (texts[TEXT_INSTRUCTIONS], NULL, screen, &rect);
+	
+	/* Copiar las instrucciones */
+	rect.x = 232 + (296 - texts[TEXT_INSTRUCTIONS_2]->w) / 2;
+	rect.y = 119;
+	rect.w = texts[TEXT_INSTRUCTIONS_2]->w;
+	rect.h = texts[TEXT_INSTRUCTIONS_2]->h;
+	
+	SDL_BlitSurface (texts[TEXT_INSTRUCTIONS_2], NULL, screen, &rect);
+	
+	rect.x = 332 + (196 - texts[TEXT_SCORING]->w) / 2;
+	rect.y = 173;
+	rect.w = texts[TEXT_SCORING]->w;
+	rect.h = texts[TEXT_SCORING]->h;
+	
+	SDL_BlitSurface (texts[TEXT_SCORING], NULL, screen, &rect);
+	
+	rect.x = 332 + (196 - texts[TEXT_SCORING_2]->w) / 2;
+	rect.y = 200;
+	rect.w = texts[TEXT_SCORING_2]->w;
+	rect.h = texts[TEXT_SCORING_2]->h;
+	
+	SDL_BlitSurface (texts[TEXT_SCORING_2], NULL, screen, &rect);
+	
+	/* Dibujar el puffle */
+	rect2.w = 63;
+	rect2.h = 27;
+	rect2.x = 0;
+	rect2.y = 0;
+	
+	rect.x = 265;
+	rect.y = 211;
+	rect.w = 63;
+	rect.h = 27;
+	SDL_BlitSurface (images[IMG_PUFFLE_ANIM], &rect2, screen, &rect);
+	
+	/* La flecha de la animación */
+	rect.x = 252 + (int) pointer_pos[frame][0];
+	rect.y = 241 + (int) pointer_pos[frame][1];
+	rect.w = images[IMG_POINTER]->w;
+	rect.h = images[IMG_POINTER]->h;
+	
+	minx = maxx = rect.x;
+	miny = maxy = rect.y;
+	
+	SDL_BlitSurface (images[IMG_POINTER], NULL, screen, &rect);
+	
+	/* El texto de play del botón */
+	rect.w = texts[TEXT_PLAY_TITLE]->w;
+	rect.x = 416 + (106 - rect.w) / 2;
+	rect.y = 278;
+	rect.h = texts[TEXT_PLAY_TITLE]->h;
+	SDL_BlitSurface (texts[TEXT_PLAY_TITLE], NULL, screen, &rect);
+	
+	/* El botón de cerrar */
+	rect.x = 720;
+	rect.y = 12;
+	rect.w = images[IMG_BUTTON_CLOSE_UP]->w;
+	rect.h = images[IMG_BUTTON_CLOSE_UP]->h;
+	
+	SDL_BlitSurface (images[cp_button_frames[BUTTON_CLOSE]], NULL, screen, &rect);
+	
+	SDL_Flip (screen);
+	
+	do {
+		last_time = SDL_GetTicks ();
+		
+		num_rects = 0;
+		
+		if (!Mix_PlayingMusic ()) {
+			map = RANDOM (2);
+			Mix_PlayMusic (music[map], 1);
+		}
+		
+		while (SDL_PollEvent(&event) > 0) {
+			/* fprintf (stdout, "Evento: %i\n", event.type);*/
+			switch (event.type) {
+				case SDL_QUIT:
+					/* Vamos a cerrar la aplicación */
+					done = GAME_QUIT;
+					break;
+				case SDL_MOUSEMOTION:
+					map = map_button_in_explain (event.motion.x, event.motion.y);
+					cp_button_motion (map);
+					break;
+				case SDL_MOUSEBUTTONDOWN:
+					map = map_button_in_explain (event.button.x, event.button.y);
+					cp_button_down (map);
+					if (map == BUTTON_UI_START) {
+						//if (use_sound) Mix_PlayChannel (-1, sounds[SND_BUTTON], 0);
+					}
+					break;
+				case SDL_MOUSEBUTTONUP:
+					map = map_button_in_explain (event.button.x, event.button.y);
+					map = cp_button_up (map);
+					
+					switch (map) {
+						case BUTTON_UI_START:
+							done = GAME_CONTINUE;
+							break;
+						case BUTTON_CLOSE:
+							done = GAME_QUIT;
+							break;
+					}
+					break;
+				case SDL_KEYDOWN:
+					if (event.key.keysym.sym == SDLK_ESCAPE) {
+						done = GAME_QUIT;
+					}
+					if (event.key.keysym.sym == SDLK_c) {
+						done = GAME_CONTINUE;
+					}
+				break;
+			}
+		}
+		
+		/* Borrar la animación previa */
+		/* Copiar la pantalla de introducción */
+		rect.x = 204;
+		rect.y = 57;
+		rect.w = images[IMG_INTRO]->w;
+		rect.h = images[IMG_INTRO]->h;
+		
+		SDL_BlitSurface (images[IMG_INTRO], NULL, screen, &rect);
+		update_rects[num_rects++] = rect;
+		
+		/* Copiar el texto de instrucciones centrado */
+		rect.x = 232 + (296 - texts[TEXT_INSTRUCTIONS]->w) / 2;
+		rect.y = 92;
+		rect.w = texts[TEXT_INSTRUCTIONS]->w;
+		rect.h = texts[TEXT_INSTRUCTIONS]->h;
+		
+		SDL_BlitSurface (texts[TEXT_INSTRUCTIONS], NULL, screen, &rect);
+		
+		/* Copiar las instrucciones */
+		rect.x = 232 + (296 - texts[TEXT_INSTRUCTIONS_2]->w) / 2;
+		rect.y = 119;
+		rect.w = texts[TEXT_INSTRUCTIONS_2]->w;
+		rect.h = texts[TEXT_INSTRUCTIONS_2]->h;
+		
+		SDL_BlitSurface (texts[TEXT_INSTRUCTIONS_2], NULL, screen, &rect);
+		
+		rect.x = 332 + (196 - texts[TEXT_SCORING]->w) / 2;
+		rect.y = 173;
+		rect.w = texts[TEXT_SCORING]->w;
+		rect.h = texts[TEXT_SCORING]->h;
+		
+		SDL_BlitSurface (texts[TEXT_SCORING], NULL, screen, &rect);
+	
+		rect.x = 332 + (196 - texts[TEXT_SCORING_2]->w) / 2;
+		rect.y = 200;
+		rect.w = texts[TEXT_SCORING_2]->w;
+		rect.h = texts[TEXT_SCORING_2]->h;
+		
+		SDL_BlitSurface (texts[TEXT_SCORING_2], NULL, screen, &rect);
+		
+		/* Ejecutar la animación */
+		frame++;
+		if (frame > 65) frame = 0;
+		
+		/* La flecha de la animación */
+		rect.x = 252 + (int) pointer_pos[frame][0];
+		rect.y = 241 + (int) pointer_pos[frame][1];
+		rect.w = images[IMG_POINTER]->w;
+		rect.h = images[IMG_POINTER]->h;
+		
+		SDL_BlitSurface (images[IMG_POINTER], NULL, screen, &rect);
+		
+		/* El puffle */
+		if (frame < 12) {
+			map = 0;
+		} else if (frame < 23) {
+			map = frame - 11;
+		} else if (frame < 41) {
+			map = 12;
+		} else if (frame < 51) {
+			map = frame - 27;
+		} else {
+			map = 0;
+		}
+		
+		rect2.w = 63;
+		rect2.h = 27;
+		rect2.x = (map % 6) * 63;
+		rect2.y = (map / 6) * 27;
+		
+		rect.x = 265;
+		rect.y = 211;
+		rect.w = 63;
+		rect.h = 27;
+		SDL_BlitSurface (images[IMG_PUFFLE_ANIM], &rect2, screen, &rect);
+		
+		if (cp_button_refresh[BUTTON_CLOSE]) {
+			rect.x = 720;
+			rect.y = 12;
+			rect.w = images[IMG_BUTTON_CLOSE_UP]->w;
+			rect.h = images[IMG_BUTTON_CLOSE_UP]->h;
+			
+			SDL_BlitSurface (images[IMG_FONDO], &rect, screen, &rect);
+			
+			SDL_BlitSurface (images[cp_button_frames[BUTTON_CLOSE]], NULL, screen, &rect);
+			cp_button_refresh[BUTTON_CLOSE] = 0;
+			update_rects[num_rects++] = rect;
+		}
+		
+		/*if (cp_button_refresh[BUTTON_UI_START]) {*/
+			/* Borrar el fondo con blanco */
+			rect.x = 406;
+			rect.y = 278;
+			rect.w = 116;
+			rect.h = 37;
+			
+			SDL_FillRect (screen, &rect, color);
+			update_rects[num_rects++] = rect;
+			
+			/* El texto de play del botón */
+			rect.w = texts[TEXT_PLAY_TITLE]->w;
+			rect.x = 406 + (116 - rect.w) / 2;
+			rect.y = 278;
+			rect.h = texts[TEXT_PLAY_TITLE]->h;
+			SDL_BlitSurface (texts[TEXT_PLAY_TITLE], NULL, screen, &rect);
+			
+			if (cp_button_frames[BUTTON_UI_START] != BLANK_UP) {
+				rect.x = 406;
+				rect.y = 278;
+				rect.w = 116;
+				rect.h = 37;
+				
+				SDL_BlitSurface (trans, NULL, screen, &rect);
+			}
+		/*}*/
+		
+		SDL_UpdateRects (screen, num_rects, update_rects);
+		num_rects = 0;
 		
 		now_time = SDL_GetTicks ();
 		if (now_time < last_time + FPS) SDL_Delay(last_time + FPS - now_time);
@@ -1300,6 +1609,23 @@ void setup (void) {
 	
 	/* No se cierran las tipografías porque se usan después */
 	
+	font_normal = TTF_OpenFont (GAMEDATA_DIR "burbanksb.ttf", 14);
+	
+	if (!font_normal) {
+		fprintf (stderr,
+			_("Failed to load font file 'BurbankSB'\n"
+			"The error returned by SDL is:\n"
+			"%s\n"), TTF_GetError ());
+		SDL_Quit ();
+		exit (1);
+	}
+	
+	texts[TEXT_INSTRUCTIONS_2] = draw_text (font_normal, _("Move your mouse around, \"herding\" as many\npuffles as you can into the brown pen."), &negro);
+	
+	texts[TEXT_SCORING_2] = draw_text (font_normal, _("Your score will be based on\nthe number of puffles you can\ncatch within the shortest\namount of time."), &negro);
+	
+	TTF_CloseFont (font_normal);
+	
 	/* Parte de la inicialización es inicializar el arreglo de animación */
 	for (g = 0; g < 46; g++) {
 		puffle_frame_normal[0][g] = puffle_frame_normal[1][g] = puffle_frame_normal[2][g] = FACE_0_0;
@@ -1422,6 +1748,12 @@ void acomodar_puffles (Puffle *puffles) {
 
 int map_button_in_opening (int x, int y) {
 	if (x >= 403 && x < 541 && y >= 277 && y < 314) return BUTTON_UI_START;
+	if (x >= 720 && x < 749 && y >= 12 && y < 41) return BUTTON_CLOSE;
+	return BUTTON_NONE;
+}
+
+int map_button_in_explain (int x, int y) {
+	if (x >= 416 && x < 522 && y >= 278 && y < 315) return BUTTON_UI_START;
 	if (x >= 720 && x < 749 && y >= 12 && y < 41) return BUTTON_CLOSE;
 	return BUTTON_NONE;
 }

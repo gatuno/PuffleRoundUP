@@ -74,7 +74,7 @@ SDL_Surface *draw_text (TTF_Font *font, const char *cadena, SDL_Color *color) {
 		for (g = 0; g < n_tokens; g++) {
 			if (text[g] == NULL) continue;
 			SDL_SetAlpha (text[g], 0, SDL_ALPHA_OPAQUE);
-			dest_rect.x = 0;
+			dest_rect.x = (maxw - text[g]->w) / 2;
 			dest_rect.y = len * g;
 			dest_rect.w = text[g]->w;
 			dest_rect.h = text[g]->h;
