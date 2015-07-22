@@ -40,13 +40,13 @@
 #include <SDL_mixer.h>
 #include <SDL_ttf.h>
 
-#include <locale.h>
-#include "gettext.h"
-#define _(string) gettext (string)
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+
+#include <locale.h>
+#include "gettext.h"
+#define _(string) gettext (string)
 
 #include "cp-button.h"
 #include "draw-text.h"

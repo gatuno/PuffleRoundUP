@@ -1,6 +1,6 @@
-AC_INIT([Puffle Round UP], [0.9.5], [], [puffle-roundup])
+AC_INIT([Puffle Round UP], [0.9.6], [], [puffle-roundup])
 
-AC_REVISION([Revision 1])
+AC_REVISION([Revision 2])
 
 AC_CONFIG_AUX_DIR([build-aux])
 
