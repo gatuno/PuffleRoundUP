@@ -51,6 +51,8 @@
 #include "cp-button.h"
 #include "draw-text.h"
 
+#include "path.h"
+
 #define FPS (1000/24)
 
 #define SWAP(a, b, t) ((t) = (a), (a) = (b), (b) = (t))
@@ -80,6 +82,18 @@
 #define PEN_Y 271
 #define PEN_W 80
 #define PEN_H 97
+
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+#define RMASK 0xff000000
+#define GMASK 0x00ff0000
+#define BMASK 0x0000ff00
+#define AMASK 0x000000ff
+#else
+#define RMASK 0x000000ff
+#define GMASK 0x0000ff00
+#define BMASK 0x00ff0000
+#define AMASK 0xff000000
+#endif
 
 /* Enumerar las imágenes */
 enum {
@@ -116,40 +130,35 @@ enum {
 	NUM_IMAGES
 };
 
-#ifdef __MINGW32__
-#	undef GAMEDATA_DIR
-#	define GAMEDATA_DIR "./"
-#endif
-
 const char *images_names[NUM_IMAGES] = {
-	GAMEDATA_DIR "images/fondo.png",
+	"images/fondo.png",
 	
-	GAMEDATA_DIR "images/intro.png",
-	GAMEDATA_DIR "images/puffle-intro.png",
-	GAMEDATA_DIR "images/title-cage.png",
+	"images/intro.png",
+	"images/puffle-intro.png",
+	"images/title-cage.png",
 	
-	GAMEDATA_DIR "images/puffle-pen.png",
+	"images/puffle-pen.png",
 	
-	GAMEDATA_DIR "images/boton-close-up.png",
-	GAMEDATA_DIR "images/boton-close-over.png",
-	GAMEDATA_DIR "images/boton-close-down.png",
+	"images/boton-close-up.png",
+	"images/boton-close-over.png",
+	"images/boton-close-down.png",
 	
-	GAMEDATA_DIR "images/puffle-azul.png",
-	GAMEDATA_DIR "images/puffle-rosa.png",
-	GAMEDATA_DIR "images/puffle-verde.png",
-	GAMEDATA_DIR "images/puffle-negro.png",
-	GAMEDATA_DIR "images/puffle-morado.png",
-	GAMEDATA_DIR "images/puffle-rojo.png",
-	GAMEDATA_DIR "images/puffle-amarillo.png",
-	GAMEDATA_DIR "images/puffle-blanco.png",
-	GAMEDATA_DIR "images/puffle-naranja.png",
-	GAMEDATA_DIR "images/puffle-cafe.png",
+	"images/puffle-azul.png",
+	"images/puffle-rosa.png",
+	"images/puffle-verde.png",
+	"images/puffle-negro.png",
+	"images/puffle-morado.png",
+	"images/puffle-rojo.png",
+	"images/puffle-amarillo.png",
+	"images/puffle-blanco.png",
+	"images/puffle-naranja.png",
+	"images/puffle-cafe.png",
 	
-	GAMEDATA_DIR "images/wall.png",
-	GAMEDATA_DIR "images/reloj.png",
+	"images/wall.png",
+	"images/reloj.png",
 	
-	GAMEDATA_DIR "images/pointer.png",
-	GAMEDATA_DIR "images/puffle-intro-anim.png"
+	"images/pointer.png",
+	"images/puffle-intro-anim.png"
 };
 
 enum {
@@ -162,14 +171,14 @@ enum {
 };
 
 const char *sound_names[NUM_SOUNDS] = {
-	GAMEDATA_DIR "sounds/capture1.wav",
-	GAMEDATA_DIR "sounds/capture2.wav",
+	"sounds/capture1.wav",
+	"sounds/capture2.wav",
 	
-	GAMEDATA_DIR "sounds/escape.wav",
+	"sounds/escape.wav",
 };
 
-#define MUS_ROUNDUP_1 GAMEDATA_DIR "music/roundup1.ogg"
-#define MUS_ROUNDUP_2 GAMEDATA_DIR "music/roundup2.ogg"
+#define MUS_ROUNDUP_1 "music/roundup1.ogg"
+#define MUS_ROUNDUP_2 "music/roundup2.ogg"
 
 /* Enumerar las caras de los Puffles */
 enum {
@@ -324,7 +333,7 @@ int game_score (int segundos, int capturados, int *total_coins);
 void setup (void);
 SDL_Surface * set_video_mode(unsigned);
 void copy_puffle_tile (int puffle_tiles, SDL_Rect *rect, int tile);
-double encontrar_distancia (int dx, int dy);
+inline double encontrar_distancia (int dx, int dy);
 int encontrar_angulo_y_dir (int x1, int y1, int x2, int y2);
 void acomodar_puffles (Puffle *puffles);
 inline int map_button_in_opening (int x, int y);
@@ -345,9 +354,12 @@ TTF_Font *ttf14_normal;
 TTF_Font *ttf12_normal;
 
 int main (int argc, char *argv[]) {
+	
+	initSystemPaths (argv[0]);
+	
 	/* Inicializar l18n */
 	setlocale (LC_ALL, "");
-	bindtextdomain (PACKAGE, LOCALEDIR);
+	bindtextdomain (PACKAGE, l10n_path);
 
 	textdomain (PACKAGE);
 	
@@ -379,13 +391,14 @@ int game_intro (void) {
 	int num_rects;
 	Uint32 last_time, now_time;
 	int map;
-	Uint32 color;
+	Uint32 color, blanco2;
 	SDL_Surface *trans;
 	
 	color = SDL_MapRGB (screen->format, 255, 255, 255);
-	trans = SDL_CreateRGBSurface (SDL_SWSURFACE | SDL_SRCALPHA, 138, 37, 32, 0, 0, 0, 0);
-	SDL_FillRect (trans, NULL, color); /* Blanco */
-	SDL_SetAlpha (trans, SDL_SRCALPHA, 128); /* Alpha al 50 % */
+	trans = SDL_CreateRGBSurface (SDL_SWSURFACE | SDL_SRCALPHA, 138, 37, 32, RMASK, GMASK, BMASK, AMASK);
+	blanco2 = SDL_MapRGBA (trans->format, 255, 255, 255, 128);
+	SDL_FillRect (trans, NULL, blanco2); /* Blanco */
+	//SDL_SetAlpha (trans, SDL_SRCALPHA, 128); /* Alpha al 50 % */
 	
 	SDL_BlitSurface (images[IMG_FONDO], NULL, screen, NULL);
 	
@@ -554,13 +567,14 @@ int game_explain (void) {
 	int frame = 0;
 	int minx, miny, maxx, maxy;
 	
-	Uint32 color;
+	Uint32 color, blanco2;
 	SDL_Surface *trans;
 	
 	color = SDL_MapRGB (screen->format, 255, 255, 255);
-	trans = SDL_CreateRGBSurface (SDL_SWSURFACE | SDL_SRCALPHA, 106, 37, 32, 0, 0, 0, 0);
-	SDL_FillRect (trans, NULL, color); /* Blanco */
-	SDL_SetAlpha (trans, SDL_SRCALPHA, 128); /* Alpha al 50 % */
+	trans = SDL_CreateRGBSurface (SDL_SWSURFACE | SDL_SRCALPHA, 106, 37, 32, RMASK, GMASK, BMASK, AMASK);
+	blanco2 = SDL_MapRGBA (trans->format, 255, 255, 255, 128);
+	SDL_FillRect (trans, NULL, blanco2); /* Blanco */
+	//SDL_SetAlpha (trans, SDL_SRCALPHA, 128); /* Alpha al 50 % */
 	
 	SDL_BlitSurface (images[IMG_FONDO], NULL, screen, NULL);
 	
@@ -627,8 +641,8 @@ int game_explain (void) {
 	
 	/* El texto de play del botón */
 	rect.w = texts[TEXT_PLAY_TITLE]->w;
-	rect.x = 416 + (106 - rect.w) / 2;
-	rect.y = 278;
+	rect.x = 392 + (134 - rect.w) / 2;
+	rect.y = 279;
 	rect.h = texts[TEXT_PLAY_TITLE]->h;
 	SDL_BlitSurface (texts[TEXT_PLAY_TITLE], NULL, screen, &rect);
 	
@@ -795,8 +809,8 @@ int game_explain (void) {
 			
 			/* El texto de play del botón */
 			rect.w = texts[TEXT_PLAY_TITLE]->w;
-			rect.x = 406 + (116 - rect.w) / 2;
-			rect.y = 278;
+			rect.x = 392 + (134 - rect.w) / 2;
+			rect.y = 279;
 			rect.h = texts[TEXT_PLAY_TITLE]->h;
 			SDL_BlitSurface (texts[TEXT_PLAY_TITLE], NULL, screen, &rect);
 			
@@ -837,7 +851,7 @@ int game_loop (void) {
 	Uint32 *pixel;
 	int capturados, escapados;
 	int monedas = 0;
-	char buf[10];
+	char buf[60];
 	SDL_Surface *text;
 	SDL_Color blanco = {255, 255, 255, 0}, negro = {0, 0, 0, 0};
 	
@@ -1119,18 +1133,19 @@ int game_score (int segundos, int capturados, int *total_coins) {
 	SDL_Rect rect, rect2;
 	Uint32 last_time, now_time;
 	int map;
-	char buf[10];
+	char buf[60];
 	SDL_Surface *text;
 	SDL_Color negro = {0, 0, 0, 0};
-	static Uint32 color;
+	static Uint32 color, blanco2;
 	static SDL_Surface *trans = NULL;
 	int score, coins;
 	
 	if (trans == NULL) {
 		color = SDL_MapRGB (screen->format, 255, 255, 255);
-		trans = SDL_CreateRGBSurface (SDL_SWSURFACE | SDL_SRCALPHA, 155, 34, 32, 0, 0, 0, 0);
-		SDL_FillRect (trans, NULL, color); /* Blanco */
-		SDL_SetAlpha (trans, SDL_SRCALPHA, 128); /* Alpha al 50 % */
+		trans = SDL_CreateRGBSurface (SDL_SWSURFACE | SDL_SRCALPHA, 155, 34, 32, RMASK, GMASK, BMASK, AMASK);
+		blanco2 = SDL_MapRGBA (trans->format, 255, 255, 255, 128);
+		SDL_FillRect (trans, NULL, blanco2); /* Blanco */
+		//SDL_SetAlpha (trans, SDL_SRCALPHA, 128); /* Alpha al 50 % */
 	}
 	
 	score = segundos * capturados;
@@ -1386,6 +1401,7 @@ SDL_Surface * set_video_mode (unsigned flags) {
 void setup (void) {
 	SDL_Surface * image;
 	int g;
+	char buffer_file[8192];
 	TTF_Font *font_normal;
 	SDL_Color blanco = {255, 255, 255, 0}, negro = {0, 0, 0, 0}, otro;
 	
@@ -1398,7 +1414,8 @@ void setup (void) {
 		exit (1);
 	}
 	
-	image = IMG_Load (GAMEDATA_DIR "images/icon.png");
+	sprintf (buffer_file, "%simages/icon.png", systemdata_path);
+	image = IMG_Load (buffer_file);
 	
 	if (image) {
 		SDL_WM_SetIcon (image, NULL);
@@ -1438,14 +1455,15 @@ void setup (void) {
 	}
 	
 	for (g = 0; g < NUM_IMAGES; g++) {
-		image = IMG_Load (images_names[g]);
+		sprintf (buffer_file, "%s%s", systemdata_path, images_names[g]);
+		image = IMG_Load (buffer_file);
 		
 		if (image == NULL) {
 			fprintf (stderr,
 				_("Failed to load data file:\n"
 				"%s\n"
 				"The error returned by SDL is:\n"
-				"%s\n"), images_names[g], SDL_GetError());
+				"%s\n"), buffer_file, SDL_GetError());
 			SDL_Quit ();
 			exit (1);
 		}
@@ -1456,14 +1474,15 @@ void setup (void) {
 	
 	if (use_sound) {
 		for (g = 0; g < NUM_SOUNDS; g++) {
-			sounds[g] = Mix_LoadWAV (sound_names [g]);
+			sprintf (buffer_file, "%s%s", systemdata_path, sound_names[g]);
+			sounds[g] = Mix_LoadWAV (buffer_file);
 			
 			if (sounds[g] == NULL) {
 				fprintf (stderr,
 					_("Failed to load data file:\n"
 					"%s\n"
 					"The error returned by SDL is:\n"
-					"%s\n"), sound_names [g], SDL_GetError ());
+					"%s\n"), buffer_file, SDL_GetError ());
 				SDL_Quit ();
 				exit (1);
 			}
@@ -1471,8 +1490,10 @@ void setup (void) {
 		}
 		
 		/* Cargar las músicas de fondo */
-		music[0] = Mix_LoadMUS (MUS_ROUNDUP_1);
-		music[1] = Mix_LoadMUS (MUS_ROUNDUP_2);
+		sprintf (buffer_file, "%s%s", systemdata_path, MUS_ROUNDUP_1);
+		music[0] = Mix_LoadMUS (buffer_file);
+		sprintf (buffer_file, "%s%s", systemdata_path, MUS_ROUNDUP_2);
+		music[1] = Mix_LoadMUS (buffer_file);
 		
 		if (music[0] == NULL || music[1] == NULL) {
 			fprintf (stderr,
@@ -1493,7 +1514,8 @@ void setup (void) {
 	}
 	
 	/* Generar todos los textos */
-	font_normal = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 28);
+	sprintf (buffer_file, "%s%s", systemdata_path, "ccfacefront.ttf");
+	font_normal = TTF_OpenFont (buffer_file, 28);
 	
 	if (!font_normal) {
 		fprintf (stderr,
@@ -1511,7 +1533,8 @@ void setup (void) {
 	TTF_CloseFont (font_normal);
 	
 	/* Botón play de 22 puntos en la pantalla de bienvenida */
-	font_normal = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 22);
+	sprintf (buffer_file, "%s%s", systemdata_path, "ccfacefront.ttf");
+	font_normal = TTF_OpenFont (buffer_file, 22);
 	
 	if (!font_normal) {
 		fprintf (stderr,
@@ -1530,7 +1553,8 @@ void setup (void) {
 	TTF_CloseFont (font_normal);
 	
 	/* Textos de las instrucciones */
-	font_normal = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 20);
+	sprintf (buffer_file, "%s%s", systemdata_path, "ccfacefront.ttf");
+	font_normal = TTF_OpenFont (buffer_file, 20);
 	
 	if (!font_normal) {
 		fprintf (stderr,
@@ -1549,7 +1573,8 @@ void setup (void) {
 	TTF_CloseFont (font_normal);
 	
 	/* Boton PLAY de 24 puntos en la pantalla de instrucciones */
-	font_normal = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 24);
+	sprintf (buffer_file, "%s%s", systemdata_path, "ccfacefront.ttf");
+	font_normal = TTF_OpenFont (buffer_file, 24);
 	
 	if (!font_normal) {
 		fprintf (stderr,
@@ -1569,7 +1594,8 @@ void setup (void) {
 	TTF_CloseFont (font_normal);
 	
 	/* Boton PLAY de 16 puntos en la pantalla de instrucciones */
-	font_normal = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 16);
+	sprintf (buffer_file, "%s%s", systemdata_path, "ccfacefront.ttf");
+	font_normal = TTF_OpenFont (buffer_file, 16);
 	
 	if (!font_normal) {
 		fprintf (stderr,
@@ -1589,8 +1615,9 @@ void setup (void) {
 	
 	TTF_CloseFont (font_normal);
 	
-	ttf14_normal = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 14);
-	ttf12_normal = TTF_OpenFont (GAMEDATA_DIR "ccfacefront.ttf", 12);
+	sprintf (buffer_file, "%s%s", systemdata_path, "ccfacefront.ttf");
+	ttf14_normal = TTF_OpenFont (buffer_file, 14);
+	ttf12_normal = TTF_OpenFont (buffer_file, 12);
 	
 	if (!ttf14_normal || !ttf12_normal) {
 		fprintf (stderr,
@@ -1608,8 +1635,8 @@ void setup (void) {
 	texts [TEXT_ESCAPED] = draw_text_with_shadow (ttf14_normal, 2, _("ESCAPED:"), &blanco, &negro);
 	
 	/* No se cierran las tipografías porque se usan después */
-	
-	font_normal = TTF_OpenFont (GAMEDATA_DIR "burbanksb.ttf", 14);
+	sprintf (buffer_file, "%s%s", systemdata_path, "burbanksb.ttf");
+	font_normal = TTF_OpenFont (buffer_file, 14);
 	
 	if (!font_normal) {
 		fprintf (stderr,

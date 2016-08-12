@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: puffle-roundup 0.9.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-07-18 21:09-0500\n"
+"POT-Creation-Date: 2016-08-11 22:15-0500\n"
 "PO-Revision-Date: 2015-07-21 19:28-0500\n"
 "Last-Translator: Félix Arreola Rodrguez <gatuno_123@esdebian.org>\n"
 "Language-Team: Spanish\n"
@@ -17,32 +17,32 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/roundup.c:1165
+#: src/roundup.c:1180
 #, c-format
 msgid "%i SECONDS LEFT"
 msgstr "TIEMPO: %i"
 
-#: src/roundup.c:1188
+#: src/roundup.c:1203
 #, c-format
 msgid "%i PUFFLES CAUGHT ="
 msgstr "PUFFLES ARREADOS %i ="
 
-#: src/roundup.c:1200
+#: src/roundup.c:1215
 #, c-format
 msgid "TOTAL SCORE: %i"
 msgstr "PUNTOS DE ESTA RONDA: %i"
 
-#: src/roundup.c:1212
+#: src/roundup.c:1227
 #, c-format
 msgid "COINS THIS ROUND: %i"
 msgstr "MONEDAS DE ESTA RONDA: %i"
 
-#: src/roundup.c:1224
+#: src/roundup.c:1239
 #, c-format
 msgid "TOTAL COINS: %i"
 msgstr "MONEDAS TOTALES: %i"
 
-#: src/roundup.c:1395
+#: src/roundup.c:1411
 #, c-format
 msgid ""
 "Error: Can't initialize the video subsystem\n"
@@ -53,7 +53,7 @@ msgstr ""
 "El error regresado por SDL es:\n"
 "%s\n"
 
-#: src/roundup.c:1415
+#: src/roundup.c:1432
 #, c-format
 msgid ""
 "Error: Can't setup 760x480 video mode.\n"
@@ -64,7 +64,7 @@ msgstr ""
 "El error regresado por SDL es:\n"
 "%s\n"
 
-#: src/roundup.c:1445 src/roundup.c:1463
+#: src/roundup.c:1463 src/roundup.c:1482
 #, c-format
 msgid ""
 "Failed to load data file:\n"
@@ -77,7 +77,7 @@ msgstr ""
 "El error regresado por SDL es:\n"
 "%s\n"
 
-#: src/roundup.c:1479
+#: src/roundup.c:1500
 #, c-format
 msgid ""
 "Failed to load a music file.\n"
@@ -88,7 +88,7 @@ msgstr ""
 "El error regresado por SDL es:\n"
 "%s\n"
 
-#: src/roundup.c:1489
+#: src/roundup.c:1510
 #, c-format
 msgid ""
 "Error: Can't initialize the SDL TTF library\n"
@@ -97,8 +97,8 @@ msgstr ""
 "Error: No se pudo inicializar la biblioteca SDL TFF\n"
 "%s\n"
 
-#: src/roundup.c:1500 src/roundup.c:1518 src/roundup.c:1537 src/roundup.c:1556
-#: src/roundup.c:1576 src/roundup.c:1597
+#: src/roundup.c:1522 src/roundup.c:1541 src/roundup.c:1561 src/roundup.c:1581
+#: src/roundup.c:1602 src/roundup.c:1624
 #, c-format
 msgid ""
 "Failed to load font file 'CCFaceFront'\n"
@@ -109,43 +109,43 @@ msgstr ""
 "El error regresado por SDL es:\n"
 "%s\n"
 
-#: src/roundup.c:1509
+#: src/roundup.c:1531
 msgid "PUFFLE ROUNDUP"
 msgstr "FUGA DE PUFFLES"
 
-#: src/roundup.c:1528 src/roundup.c:1566
+#: src/roundup.c:1551 src/roundup.c:1591
 msgid "PLAY"
 msgstr "JUGAR"
 
-#: src/roundup.c:1546
+#: src/roundup.c:1570
 msgid "INSTRUCTIONS:"
 msgstr "CÓMO JUGAR:"
 
-#: src/roundup.c:1547
+#: src/roundup.c:1571
 msgid "SCORING:"
 msgstr "PUNTOS:"
 
-#: src/roundup.c:1567
+#: src/roundup.c:1592
 msgid "SCORE:"
 msgstr "PUNTOS:"
 
-#: src/roundup.c:1586
+#: src/roundup.c:1612
 msgid "PLAY MORE"
 msgstr "CONTINUAR"
 
-#: src/roundup.c:1588
+#: src/roundup.c:1614
 msgid "FINISH"
 msgstr "FIN"
 
-#: src/roundup.c:1607
+#: src/roundup.c:1634
 msgid "CAUGHT:"
 msgstr "ARREADOS:"
 
-#: src/roundup.c:1608
+#: src/roundup.c:1635
 msgid "ESCAPED:"
 msgstr "FUGADOS:"
 
-#: src/roundup.c:1616
+#: src/roundup.c:1643
 #, c-format
 msgid ""
 "Failed to load font file 'BurbankSB'\n"
@@ -156,7 +156,7 @@ msgstr ""
 "The error returned by SDL is:\n"
 "%s\n"
 
-#: src/roundup.c:1623
+#: src/roundup.c:1650
 msgid ""
 "Move your mouse around, \"herding\" as many\n"
 "puffles as you can into the brown pen."
@@ -164,7 +164,7 @@ msgstr ""
 "Usa el mouse para \"arrear\" a todos\n"
 "los puffles que puedas adentro del corral."
 
-#: src/roundup.c:1625
+#: src/roundup.c:1652
 msgid ""
 "Your score will be based on\n"
 "the number of puffles you can\n"
