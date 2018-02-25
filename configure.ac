@@ -17,10 +17,10 @@ AC_PROG_OBJC
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 # Translate this program
-AM_GNU_GETTEXT_VERSION([0.18.1])
+AM_GNU_GETTEXT_VERSION([0.19.3])
 AM_GNU_GETTEXT([external])
 
-ALL_LINGUAS="es"
+ALL_LINGUAS="es de fr"
 AC_SUBST(ALL_LINGUAS)
 
 AM_PROG_CC_C_O
@@ -80,6 +80,7 @@ if test "x$MACOSX" = xyes; then
 			AC_LIB_APPENDTOVAR([CFLAGS], [-F$cy_framework])
 			AC_LIB_APPENDTOVAR([CXXFLAGS], [-F$cy_framework])
 			AC_LIB_APPENDTOVAR([OBJCCXXFLAGS], [-F$cy_framework])
+			AC_LIB_APPENDTOVAR([LDFLAGS], [-F$cy_framework])
 			for g in $SDL_FRAMEWORKS; do
 				AC_LIB_APPENDTOVAR([CPPFLAGS], [-I$cy_framework/$g.framework/Headers])
 			done

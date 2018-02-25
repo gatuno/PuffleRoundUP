@@ -21,9 +21,9 @@
 #ifndef __PATH_H__
 #define __PATH_H__
 
-extern char *systemdata_path;
-extern char *l10n_path;
-extern char *userdata_path;
+char *get_systemdata_path (void);
+char *get_l10n_path (void);
+char *get_userdata_path (void);
 
 void initSystemPaths (const char *argv_0);
 int folder_exists (const char *fname);

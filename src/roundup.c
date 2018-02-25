@@ -359,7 +359,7 @@ int main (int argc, char *argv[]) {
 	
 	/* Inicializar l18n */
 	setlocale (LC_ALL, "");
-	bindtextdomain (PACKAGE, l10n_path);
+	bindtextdomain (PACKAGE, get_l10n_path ());
 
 	textdomain (PACKAGE);
 	
@@ -1403,6 +1403,7 @@ void setup (void) {
 	int g;
 	char buffer_file[8192];
 	TTF_Font *font_normal;
+	char *systemdata_path = get_systemdata_path ();
 	SDL_Color blanco = {255, 255, 255, 0}, negro = {0, 0, 0, 0}, otro;
 	
 	/* Inicializar el Video SDL */
@@ -1445,6 +1446,8 @@ void setup (void) {
 	
 	if (use_sound) {
 		/* Inicializar el sonido */
+		Mix_Init (MIX_INIT_OGG);
+		
 		if (Mix_OpenAudio (22050, AUDIO_S16, 2, 4096) < 0) {
 			fprintf (stdout,
 				"Warning: Can't initialize the SDL Mixer library\n");

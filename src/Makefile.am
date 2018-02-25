@@ -10,7 +10,7 @@ puffle_roundup_SOURCES = roundup.c \
 	gettext.h
 
 if MINGW32
-puffle_roundup_SOURCES += strsep.c
+puffle_roundup_SOURCES += strsep.c strsep.h
 endif
 
 if MACOSX
@@ -33,7 +33,7 @@ puffle_roundup_CPPFLAGS = -DGAMEDATA_DIR=\"$(gamedatadir)/\" -DLOCALEDIR=\"$(loc
 puffle_roundup_CFLAGS = $(SDL_CFLAGS) $(SDL_image_CFLAGS) $(SDL_mixer_CFLAGS) $(SDL_ttf_CFLAGS) $(AM_CFLAGS)
 if MACOSX
 # En MAC OS X, hay que ligar/compilar contra los frameworks
-puffle_roundup_LDFLAGS = -Wl,-rpath,@loader_path/../Frameworks
+puffle_roundup_LDFLAGS = -Wl,-rpath,@loader_path/../Frameworks $(AM_LDFLAGS)
 else
 puffle_roundup_LDADD = $(SDL_LIBS) $(SDL_image_LIBS) $(SDL_mixer_LIBS) $(SDL_ttf_LIBS) -lm $(mingw_ldadd)
 endif

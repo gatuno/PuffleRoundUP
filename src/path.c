@@ -41,9 +41,9 @@
 
 #include "path.h"
 
-char *systemdata_path;
-char *l10n_path;
-char *userdata_path;
+static char *systemdata_path;
+static char *l10n_path;
+static char *userdata_path;
 
 //#ifdef __MINGW32__
 //const char *PathSeparator = "\\";      // for path assembly
@@ -288,5 +288,17 @@ void initSystemPaths (const char *argv_0) {
 	/* Liberar las cadenas temporales */
 	free (progdir);
 	free (progCallPath);
+}
+
+char *get_systemdata_path (void) {
+	return systemdata_path;
+}
+
+char *get_l10n_path (void) {
+	return l10n_path;
+}
+
+char *get_userdata_path (void) {
+	return userdata_path;
 }
 

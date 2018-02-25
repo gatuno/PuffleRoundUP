@@ -1,46 +1,47 @@
-# Spanish translations for puffle-roundup package.
-# Copyright (C) 2015 Free Software Foundation, Inc.
+# German translations for puffle-roundup package.
+# Copyright (C) 2018 Free Software Foundation, Inc.
 # This file is distributed under the same license as the puffle-roundup package.
-# Félix Arreola Rodríguez <gatuno@daryl.gatuno.mx>, 2015.
+# FÃ©lix Arreola RodrÃ­guez <apt@gatuno.mx>, 2018.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: puffle-roundup 0.9.5\n"
+"Project-Id-Version: puffle-roundup 0.9.7\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-02-22 22:58-0600\n"
-"PO-Revision-Date: 2015-07-21 19:28-0500\n"
-"Last-Translator: Félix Arreola Rodrguez <apt@gatuno.mx>\n"
-"Language-Team: Spanish\n"
-"Language: es\n"
+"PO-Revision-Date: 2018-02-22 20:58-0600\n"
+"Last-Translator: Félix Arreola Rodríguez <apt@gatuno.mx>\n"
+"Language-Team: German\n"
+"Language: de\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.6.10\n"
 
 #: src/roundup.c:1180
 #, c-format
 msgid "%i SECONDS LEFT"
-msgstr "TIEMPO: %i"
+msgstr "ZEIT: %i"
 
 #: src/roundup.c:1203
 #, c-format
 msgid "%i PUFFLES CAUGHT ="
-msgstr "PUFFLES ARREADOS %i ="
+msgstr "GEFANGENE PUFFLES: %i"
 
 #: src/roundup.c:1215
 #, c-format
 msgid "TOTAL SCORE: %i"
-msgstr "PUNTOS DE ESTA RONDA: %i"
+msgstr "PUNKTE FÜR DIESE RUNDE: %i"
 
 #: src/roundup.c:1227
 #, c-format
 msgid "COINS THIS ROUND: %i"
-msgstr "MONEDAS DE ESTA RONDA: %i"
+msgstr "MÜNZEN FÜR DIESE RUNDE: %i"
 
 #: src/roundup.c:1239
 #, c-format
 msgid "TOTAL COINS: %i"
-msgstr "MONEDAS TOTALES: %i"
+msgstr "ALLE MÜNZEN: %i"
 
 #: src/roundup.c:1412
 #, c-format
@@ -49,9 +50,6 @@ msgid ""
 "The error returned by SDL is:\n"
 "%s\n"
 msgstr ""
-"Error: No se pudo inicializar el sistema de video\n"
-"El error regresado por SDL es:\n"
-"%s\n"
 
 #: src/roundup.c:1433
 #, c-format
@@ -60,9 +58,6 @@ msgid ""
 "The error returned by SDL is:\n"
 "%s\n"
 msgstr ""
-"Error: No se pudo establecer el modo de video 760x480.\n"
-"El error regresado por SDL es:\n"
-"%s\n"
 
 #: src/roundup.c:1466 src/roundup.c:1485
 #, c-format
@@ -72,10 +67,6 @@ msgid ""
 "The error returned by SDL is:\n"
 "%s\n"
 msgstr ""
-"Falló al cargar el archivo de datos:\n"
-"%s\n"
-"El error regresado por SDL es:\n"
-"%s\n"
 
 #: src/roundup.c:1503
 #, c-format
@@ -84,9 +75,6 @@ msgid ""
 "The error returned by SDL is:\n"
 "%s\n"
 msgstr ""
-"Falló al cargar el archivo de música.\n"
-"El error regresado por SDL es:\n"
-"%s\n"
 
 #: src/roundup.c:1513
 #, c-format
@@ -94,8 +82,6 @@ msgid ""
 "Error: Can't initialize the SDL TTF library\n"
 "%s\n"
 msgstr ""
-"Error: No se pudo inicializar la biblioteca SDL TTF\n"
-"%s\n"
 
 #: src/roundup.c:1525 src/roundup.c:1544 src/roundup.c:1564 src/roundup.c:1584
 #: src/roundup.c:1605 src/roundup.c:1627
@@ -105,45 +91,42 @@ msgid ""
 "The error returned by SDL is:\n"
 "%s\n"
 msgstr ""
-"Falló al cargar la tipografía 'CCFaceFront'\n"
-"El error regresado por SDL es:\n"
-"%s\n"
 
 #: src/roundup.c:1534
 msgid "PUFFLE ROUNDUP"
-msgstr "FUGA DE PUFFLES"
+msgstr "PUFFLE-RODEO"
 
 #: src/roundup.c:1554 src/roundup.c:1594
 msgid "PLAY"
-msgstr "JUGAR"
+msgstr "SPIELEN"
 
 #: src/roundup.c:1573
 msgid "INSTRUCTIONS:"
-msgstr "CÓMO JUGAR:"
+msgstr "ANLEITUNG:"
 
 #: src/roundup.c:1574
 msgid "SCORING:"
-msgstr "PUNTOS:"
+msgstr "PUNKTE:"
 
 #: src/roundup.c:1595
 msgid "SCORE:"
-msgstr "PUNTOS:"
+msgstr "PUNKTE:"
 
 #: src/roundup.c:1615
 msgid "PLAY MORE"
-msgstr "CONTINUAR"
+msgstr "WEITER SPIELEN"
 
 #: src/roundup.c:1617
 msgid "FINISH"
-msgstr "FIN"
+msgstr "BEENDEN"
 
 #: src/roundup.c:1637
 msgid "CAUGHT:"
-msgstr "ARREADOS:"
+msgstr "GEFANGEN:"
 
 #: src/roundup.c:1638
 msgid "ESCAPED:"
-msgstr "FUGADOS:"
+msgstr "ENTKOMMEN:"
 
 #: src/roundup.c:1646
 #, c-format
@@ -152,17 +135,14 @@ msgid ""
 "The error returned by SDL is:\n"
 "%s\n"
 msgstr ""
-"Failed to load font file 'BurbankSB'\n"
-"The error returned by SDL is:\n"
-"%s\n"
 
 #: src/roundup.c:1653
 msgid ""
 "Move your mouse around, \"herding\" as many\n"
 "puffles as you can into the brown pen."
 msgstr ""
-"Usa el mouse para \"arrear\" a todos\n"
-"los puffles que puedas adentro del corral."
+"Bewege deine Maus, um die Puffle-Herde herum,\n"
+"damit du so viele Puffles wie möglich eintreibst."
 
 #: src/roundup.c:1655
 msgid ""
@@ -171,6 +151,7 @@ msgid ""
 "catch within the shortest\n"
 "amount of time."
 msgstr ""
-"Tu puntaje dependerá de la\n"
-"cantidad de puffles que arrees\n"
-"en el menor tiempo posible."
+"Deine Punktzahl ist abhängig\n"
+"von der Anzahl gefangener\n"
+"Puffles und der dafür\n"
+"benötigten Zeit."
