@@ -1402,9 +1402,10 @@ void setup (void) {
 	SDL_Surface * image;
 	int g;
 	char buffer_file[8192];
-	TTF_Font *font_normal;
+	TTF_Font *temp1, *temp2, *temp3, *temp4, *temp5, *temp6;
 	char *systemdata_path = get_systemdata_path ();
 	SDL_Color blanco = {255, 255, 255, 0}, negro = {0, 0, 0, 0}, otro;
+	SDL_RWops *ttf_facefront;
 	
 	/* Inicializar el Video SDL */
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -1518,130 +1519,56 @@ void setup (void) {
 	
 	/* Generar todos los textos */
 	sprintf (buffer_file, "%s%s", systemdata_path, "ccfacefront.ttf");
-	font_normal = TTF_OpenFont (buffer_file, 28);
+	ttf_facefront = SDL_RWFromFile (buffer_file, "rb");
 	
-	if (!font_normal) {
+	if (!ttf_facefront) {
 		fprintf (stderr,
 			_("Failed to load font file 'CCFaceFront'\n"
 			"The error returned by SDL is:\n"
-			"%s\n"), TTF_GetError ());
+			"%s\n"), SDL_GetError ());
 		SDL_Quit ();
 		exit (1);
 	}
 	
-	TTF_SetFontStyle (font_normal, TTF_STYLE_ITALIC);
-	
-	texts [TEXT_TITLE] = draw_text_with_shadow (font_normal, 3, _("PUFFLE ROUNDUP"), &blanco, &negro);
-	
-	TTF_CloseFont (font_normal);
+	SDL_RWseek (ttf_facefront, 0, RW_SEEK_SET);
+	temp1 = TTF_OpenFontRW (ttf_facefront, 0, 28);
 	
 	/* Botón play de 22 puntos en la pantalla de bienvenida */
-	sprintf (buffer_file, "%s%s", systemdata_path, "ccfacefront.ttf");
-	font_normal = TTF_OpenFont (buffer_file, 22);
-	
-	if (!font_normal) {
-		fprintf (stderr,
-			_("Failed to load font file 'CCFaceFront'\n"
-			"The error returned by SDL is:\n"
-			"%s\n"), TTF_GetError ());
-		SDL_Quit ();
-		exit (1);
-	}
-	
-	TTF_SetFontStyle (font_normal, TTF_STYLE_ITALIC);
-	
-	otro.r = 0xFF; otro.g = 0xCC; otro.b = 0;
-	texts [TEXT_PLAY_TITLE] = draw_text_with_shadow (font_normal, 2, _("PLAY"), &otro, &negro);
-	
-	TTF_CloseFont (font_normal);
+	SDL_RWseek (ttf_facefront, 0, RW_SEEK_SET);
+	temp2 = TTF_OpenFontRW (ttf_facefront, 0, 22);
 	
 	/* Textos de las instrucciones */
-	sprintf (buffer_file, "%s%s", systemdata_path, "ccfacefront.ttf");
-	font_normal = TTF_OpenFont (buffer_file, 20);
-	
-	if (!font_normal) {
-		fprintf (stderr,
-			_("Failed to load font file 'CCFaceFront'\n"
-			"The error returned by SDL is:\n"
-			"%s\n"), TTF_GetError ());
-		SDL_Quit ();
-		exit (1);
-	}
-	
-	TTF_SetFontStyle (font_normal, TTF_STYLE_ITALIC);
-	
-	texts [TEXT_INSTRUCTIONS] = draw_text_with_shadow (font_normal, 2, _("INSTRUCTIONS:"), &blanco, &negro);
-	texts [TEXT_SCORING] = draw_text_with_shadow (font_normal, 2, _("SCORING:"), &blanco, &negro);
-	
-	TTF_CloseFont (font_normal);
+	SDL_RWseek (ttf_facefront, 0, RW_SEEK_SET);
+	temp3 = TTF_OpenFontRW (ttf_facefront, 0, 20);
 	
 	/* Boton PLAY de 24 puntos en la pantalla de instrucciones */
-	sprintf (buffer_file, "%s%s", systemdata_path, "ccfacefront.ttf");
-	font_normal = TTF_OpenFont (buffer_file, 24);
-	
-	if (!font_normal) {
-		fprintf (stderr,
-			_("Failed to load font file 'CCFaceFront'\n"
-			"The error returned by SDL is:\n"
-			"%s\n"), TTF_GetError ());
-		SDL_Quit ();
-		exit (1);
-	}
-	
-	TTF_SetFontStyle (font_normal, TTF_STYLE_ITALIC);
-	
-	otro.r = 0xFF; otro.g = 0xCC; otro.b = 0;
-	texts [TEXT_PLAY_2] = draw_text_with_shadow (font_normal, 3, _("PLAY"), &otro, &negro);
-	texts [TEXT_SCORE] = draw_text_with_shadow (font_normal, 3, _("SCORE:"), &blanco, &negro);
-	
-	TTF_CloseFont (font_normal);
+	SDL_RWseek (ttf_facefront, 0, RW_SEEK_SET);
+	temp4 = TTF_OpenFontRW (ttf_facefront, 0, 24);
 	
 	/* Boton PLAY de 16 puntos en la pantalla de instrucciones */
-	sprintf (buffer_file, "%s%s", systemdata_path, "ccfacefront.ttf");
-	font_normal = TTF_OpenFont (buffer_file, 16);
+	SDL_RWseek (ttf_facefront, 0, RW_SEEK_SET);
+	temp5 = TTF_OpenFontRW (ttf_facefront, 0, 16);
 	
-	if (!font_normal) {
-		fprintf (stderr,
-			_("Failed to load font file 'CCFaceFront'\n"
-			"The error returned by SDL is:\n"
-			"%s\n"), TTF_GetError ());
+	if (!temp1 || !temp2 || !temp3 || !temp4 || !temp5) {
 		SDL_Quit ();
 		exit (1);
 	}
 	
-	TTF_SetFontStyle (font_normal, TTF_STYLE_ITALIC);
-	
-	otro.r = 0xFF; otro.g = 0xCC; otro.b = 0;
-	texts [TEXT_PLAYMORE] = draw_text_with_shadow (font_normal, 2, _("PLAY MORE"), &otro, &negro);
-	otro.r = 0x66; otro.g = 0xCC; otro.b = 0xFF;
-	texts [TEXT_FINISH] = draw_text_with_shadow (font_normal, 2, _("FINISH"), &otro, &negro);
-	
-	TTF_CloseFont (font_normal);
-	
-	sprintf (buffer_file, "%s%s", systemdata_path, "ccfacefront.ttf");
-	ttf14_normal = TTF_OpenFont (buffer_file, 14);
-	ttf12_normal = TTF_OpenFont (buffer_file, 12);
+	SDL_RWseek (ttf_facefront, 0, RW_SEEK_SET);
+	ttf14_normal = TTF_OpenFontRW (ttf_facefront, 0, 14);
+	SDL_RWseek (ttf_facefront, 0, RW_SEEK_SET);
+	ttf12_normal = TTF_OpenFontRW (ttf_facefront, 1, 12);
 	
 	if (!ttf14_normal || !ttf12_normal) {
-		fprintf (stderr,
-			_("Failed to load font file 'CCFaceFront'\n"
-			"The error returned by SDL is:\n"
-			"%s\n"), TTF_GetError ());
 		SDL_Quit ();
 		exit (1);
 	}
-	
-	TTF_SetFontStyle (ttf14_normal, TTF_STYLE_ITALIC);
-	TTF_SetFontStyle (ttf12_normal, TTF_STYLE_ITALIC);
-	
-	texts [TEXT_CAUGHT] = draw_text_with_shadow (ttf14_normal, 2, _("CAUGHT:"), &blanco, &negro);
-	texts [TEXT_ESCAPED] = draw_text_with_shadow (ttf14_normal, 2, _("ESCAPED:"), &blanco, &negro);
 	
 	/* No se cierran las tipografías porque se usan después */
 	sprintf (buffer_file, "%s%s", systemdata_path, "burbanksb.ttf");
-	font_normal = TTF_OpenFont (buffer_file, 14);
+	temp6 = TTF_OpenFont (buffer_file, 14);
 	
-	if (!font_normal) {
+	if (!temp6) {
 		fprintf (stderr,
 			_("Failed to load font file 'BurbankSB'\n"
 			"The error returned by SDL is:\n"
@@ -1650,11 +1577,52 @@ void setup (void) {
 		exit (1);
 	}
 	
-	texts[TEXT_INSTRUCTIONS_2] = draw_text (font_normal, _("Move your mouse around, \"herding\" as many\npuffles as you can into the brown pen."), &negro);
+	/* Renderizar todos los textos */
+	bind_textdomain_codeset (PACKAGE, "UTF-8");
 	
-	texts[TEXT_SCORING_2] = draw_text (font_normal, _("Your score will be based on\nthe number of puffles you can\ncatch within the shortest\namount of time."), &negro);
+	TTF_SetFontStyle (temp1, TTF_STYLE_ITALIC);
 	
-	TTF_CloseFont (font_normal);
+	texts [TEXT_TITLE] = draw_text_with_shadow (temp1, 3, _("PUFFLE ROUNDUP"), &blanco, &negro);
+	
+	TTF_SetFontStyle (temp2, TTF_STYLE_ITALIC);
+	
+	otro.r = 0xFF; otro.g = 0xCC; otro.b = 0;
+	texts [TEXT_PLAY_TITLE] = draw_text_with_shadow (temp2, 2, _("PLAY"), &otro, &negro);
+	
+	TTF_SetFontStyle (temp3, TTF_STYLE_ITALIC);
+	
+	texts [TEXT_INSTRUCTIONS] = draw_text_with_shadow (temp3, 2, _("INSTRUCTIONS:"), &blanco, &negro);
+	texts [TEXT_SCORING] = draw_text_with_shadow (temp3, 2, _("SCORING:"), &blanco, &negro);
+	
+	TTF_SetFontStyle (temp4, TTF_STYLE_ITALIC);
+	
+	otro.r = 0xFF; otro.g = 0xCC; otro.b = 0;
+	texts [TEXT_PLAY_2] = draw_text_with_shadow (temp4, 3, _("PLAY"), &otro, &negro);
+	texts [TEXT_SCORE] = draw_text_with_shadow (temp4, 3, _("SCORE:"), &blanco, &negro);
+	
+	TTF_SetFontStyle (temp5, TTF_STYLE_ITALIC);
+	
+	otro.r = 0xFF; otro.g = 0xCC; otro.b = 0;
+	texts [TEXT_PLAYMORE] = draw_text_with_shadow (temp5, 2, _("PLAY MORE"), &otro, &negro);
+	otro.r = 0x66; otro.g = 0xCC; otro.b = 0xFF;
+	texts [TEXT_FINISH] = draw_text_with_shadow (temp5, 2, _("FINISH"), &otro, &negro);
+	
+	TTF_SetFontStyle (ttf14_normal, TTF_STYLE_ITALIC);
+	TTF_SetFontStyle (ttf12_normal, TTF_STYLE_ITALIC);
+	
+	texts [TEXT_CAUGHT] = draw_text_with_shadow (ttf14_normal, 2, _("CAUGHT:"), &blanco, &negro);
+	texts [TEXT_ESCAPED] = draw_text_with_shadow (ttf14_normal, 2, _("ESCAPED:"), &blanco, &negro);
+	
+	texts[TEXT_INSTRUCTIONS_2] = draw_text (temp6, _("Move your mouse around, \"herding\" as many\npuffles as you can into the brown pen."), &negro);
+	
+	texts[TEXT_SCORING_2] = draw_text (temp6, _("Your score will be based on\nthe number of puffles you can\ncatch within the shortest\namount of time."), &negro);
+	
+	TTF_CloseFont (temp1);
+	TTF_CloseFont (temp2);
+	TTF_CloseFont (temp3);
+	TTF_CloseFont (temp4);
+	TTF_CloseFont (temp5);
+	TTF_CloseFont (temp6);
 	
 	/* Parte de la inicialización es inicializar el arreglo de animación */
 	for (g = 0; g < 46; g++) {
