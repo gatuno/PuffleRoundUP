@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: puffle-roundup 0.9.7\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-28 18:36-0600\n"
+"POT-Creation-Date: 2018-03-02 21:20-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -48,6 +48,10 @@ msgid ""
 "Error: Can't initialize the video subsystem\n"
 "The error returned by SDL is:\n"
 "%s\n"
+msgstr ""
+
+#: src/roundup.c:1427
+msgid "Puffle Roundup"
 msgstr ""
 
 #: src/roundup.c:1434

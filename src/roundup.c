@@ -1424,7 +1424,7 @@ void setup (void) {
 		SDL_FreeSurface (image);
 	}
 	
-	SDL_WM_SetCaption ("Puffle Round UP", "Puffle Round UP");
+	SDL_WM_SetCaption (_("Puffle Roundup"), _("Puffle Roundup"));
 	
 	/* Crear la pantalla de dibujado */
 	screen = set_video_mode (0);

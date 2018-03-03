@@ -7,15 +7,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: puffle-roundup 0.9.5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-28 18:36-0600\n"
-"PO-Revision-Date: 2015-07-21 19:28-0500\n"
-"Last-Translator: Félix Arreola Rodrguez <apt@gatuno.mx>\n"
+"POT-Creation-Date: 2018-03-02 21:20-0600\n"
+"PO-Revision-Date: 2018-03-02 21:20-0600\n"
+"Last-Translator: Félix Arreola Rodríguez <apt@gatuno.mx>\n"
 "Language-Team: Spanish\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.6.10\n"
 
 #: src/roundup.c:1180
 #, c-format
@@ -52,6 +53,10 @@ msgstr ""
 "Error: No se pudo inicializar el sistema de video\n"
 "El error regresado por SDL es:\n"
 "%s\n"
+
+#: src/roundup.c:1427
+msgid "Puffle Roundup"
+msgstr "Fuga de Puffles"
 
 #: src/roundup.c:1434
 #, c-format

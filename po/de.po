@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: puffle-roundup 0.9.7\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-28 18:36-0600\n"
-"PO-Revision-Date: 2018-02-22 20:58-0600\n"
+"POT-Creation-Date: 2018-03-02 21:20-0600\n"
+"PO-Revision-Date: 2018-03-02 21:21-0600\n"
 "Last-Translator: Félix Arreola Rodríguez <apt@gatuno.mx>\n"
 "Language-Team: German\n"
 "Language: de\n"
@@ -50,6 +50,10 @@ msgid ""
 "The error returned by SDL is:\n"
 "%s\n"
 msgstr ""
+
+#: src/roundup.c:1427
+msgid "Puffle Roundup"
+msgstr "Puffle-Rodeo"
 
 #: src/roundup.c:1434
 #, c-format
