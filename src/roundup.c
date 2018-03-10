@@ -350,6 +350,8 @@ int use_sound;
 Mix_Chunk * sounds[NUM_SOUNDS];
 Mix_Music * music[2];
 
+SDL_RWops *ttf_facefront;
+
 TTF_Font *ttf14_normal;
 TTF_Font *ttf12_normal;
 
@@ -1123,6 +1125,10 @@ int game_loop (void) {
 		if (now_time < last_time + FPS) SDL_Delay(last_time + FPS - now_time);
 	} while (!done);
 	
+	TTF_CloseFont (ttf14_normal);
+	TTF_CloseFont (ttf12_normal);
+	
+	SDL_RWclose (ttf_facefront);
 	return done;
 }
 
@@ -1405,7 +1411,6 @@ void setup (void) {
 	TTF_Font *temp1, *temp2, *temp3, *temp4, *temp5, *temp6;
 	char *systemdata_path = get_systemdata_path ();
 	SDL_Color blanco = {255, 255, 255, 0}, negro = {0, 0, 0, 0}, otro;
-	SDL_RWops *ttf_facefront;
 	
 	/* Inicializar el Video SDL */
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -1557,7 +1562,7 @@ void setup (void) {
 	SDL_RWseek (ttf_facefront, 0, RW_SEEK_SET);
 	ttf14_normal = TTF_OpenFontRW (ttf_facefront, 0, 14);
 	SDL_RWseek (ttf_facefront, 0, RW_SEEK_SET);
-	ttf12_normal = TTF_OpenFontRW (ttf_facefront, 1, 12);
+	ttf12_normal = TTF_OpenFontRW (ttf_facefront, 0, 12);
 	
 	if (!ttf14_normal || !ttf12_normal) {
 		SDL_Quit ();
